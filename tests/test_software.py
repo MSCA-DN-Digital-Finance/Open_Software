@@ -25,6 +25,7 @@ class SoftwareTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         shutil.copytree(build_site.ROOT / 'data', self.root / 'data')
         shutil.copytree(build_site.ROOT / 'site', self.root / 'site')
+        (self.root / 'data/quantlet-software.csv').unlink(missing_ok=True)
         self.target = self.root / 'data/software.csv'
         self.target.write_text(self.target.read_text().splitlines()[0] + '\n')
         for module in [build_site, import_proposal]:

@@ -30,6 +30,11 @@ def apply_proposal(path, write=False):
             raise ValueError('Software ID already exists; use an update')
         rows.append({field: record.get(field, '') for field in fields})
     else:
+        if not matches:
+            imported = [row for row in inventory()['software'] if row['id'] == record.get('id')]
+            if len(imported) == 1:
+                matches = [len(rows)]
+                rows.append({field: imported[0].get(field, '') for field in fields})
         if len(matches) != 1:
             raise ValueError('An update must use an existing software ID')
         rows[matches[0]].update(record)

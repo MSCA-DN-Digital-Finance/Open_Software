@@ -46,12 +46,13 @@ def paper_inventory(root=None):
     return data
 
 
-def inventory(root=None):
+def read_records(root=None, *, quantlet=False):
     root = root or ROOT
     papers = paper_inventory(root)
     projects = load_directory(root)
     known_irps = {p['number'] for p in projects}
-    with (root / 'data/software.csv').open(encoding='utf-8-sig', newline='') as source:
+    filename = 'quantlet-software.csv' if quantlet else 'software.csv'
+    with (root / 'data' / filename).open(encoding='utf-8-sig', newline='') as source:
         reader = csv.DictReader(source)
         if not reader.fieldnames or len(reader.fieldnames) != len(set(reader.fieldnames)):
             raise ValueError('Missing or duplicate software CSV columns')
@@ -61,7 +62,10 @@ def inventory(root=None):
         if None in row or any(value is None for value in row.values()):
             raise ValueError(f'software.csv:{line}: malformed CSV row')
         row.update({key: value.strip() for key, value in row.items()})
-        for field in ['id', 'name', 'repository_url', 'summary', 'category', 'authors', 'languages', 'irp_numbers', 'data_availability', 'data_notes', 'index']:
+        required = ['id', 'name', 'repository_url', 'summary', 'category', 'irp_numbers', 'data_availability', 'data_notes', 'index']
+        if not quantlet:
+            required += ['authors', 'languages']
+        for field in required:
             if not row.get(field):
                 raise ValueError(f'software.csv:{line}: {field} is required')
         if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', row['id']) or row['id'] in ids:
@@ -75,7 +79,7 @@ def inventory(root=None):
         for field, value in row.items():
             if field.endswith('_url') and value and not validate_url(value):
                 raise ValueError(f'{field} must be a public HTTP(S) URL')
-        if not (split(row.get('publication_ids')) or split(row.get('working_paper_ids')) or split(row.get('paper_urls'))):
+        if not quantlet and not (split(row.get('publication_ids')) or split(row.get('working_paper_ids')) or split(row.get('paper_urls'))):
             raise ValueError('Link at least one published paper, working paper or external paper URL')
         for field, kind in [('publication_ids', 'publications'), ('working_paper_ids', 'working_papers')]:
             unknown = set(split(row.get(field))) - {p['id'] for p in papers[kind]}
@@ -102,7 +106,29 @@ def inventory(root=None):
             raise ValueError('Use a direct PNG, JPEG, GIF or WebP image URL')
         if row.get('last_updated'):
             date.fromisoformat(row['last_updated'])
-    return {'software': rows}
+    return rows
+
+
+def repository_key(url):
+    parsed = urlsplit(url)
+    path = parsed.path.rstrip('/')
+    if parsed.hostname and parsed.hostname.lower() in {'github.com', 'www.github.com'}:
+        path = '/'.join(path.split('/')[:3])
+    return ((parsed.hostname or '').lower(), re.sub(r'\.git$', '', path, flags=re.I).lower())
+
+
+def inventory(root=None):
+    root = root or ROOT
+    curated = read_records(root)
+    if not (root / 'data/quantlet-software.csv').exists():
+        return {'software': curated}
+    imported = read_records(root, quantlet=True)
+    ids = {row['id'] for row in curated}
+    repositories = {repository_key(row['repository_url']) for row in curated}
+    dois = {normalized_doi(row['doi']) for row in curated if row.get('doi')}
+    imported = [row for row in imported if row['id'] not in ids and repository_key(row['repository_url']) not in repositories
+                and (not row.get('doi') or normalized_doi(row['doi']) not in dois)]
+    return {'software': curated + imported}
 
 
 def e(value):
@@ -122,6 +148,7 @@ def render_record(row, papers):
     external_titles = split(row.get('paper_titles'))
     related += ['<li>' + link(url, external_titles[i] if external_titles else 'External paper · ' + urlsplit(url).netloc) + '</li>'
                 for i, url in enumerate(split(row.get('paper_urls')))]
+    research = '<ul>' + ''.join(related) + '</ul>' if related else '<p class="muted">Paper link not yet documented. See the source Metainfo for its research context.</p>'
     tags = ''.join('<span class="tag">' + e(language) + '</span>' for language in split(row['languages']))
     irps = ''.join(f'<a class="irp-pill" href="/irps/irp-{number}.html">IRP {number}</a>' for number in split(row['irp_numbers']))
     image = f'<figure class="software-figure"><img src="{e(row["key_image_url"])}" alt="{e(row["key_image_alt"])}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>{e(row.get("key_image_caption"))}</figcaption></figure>' if row.get('key_image_url') else ''
@@ -132,7 +159,7 @@ def render_record(row, papers):
     if row.get('doi'):
         links += link('https://doi.org/' + row['doi'], 'DOI: ' + row['doi'])
     data = '<section class="software-data"><h3>Data availability</h3><strong>' + e(AVAILABILITY[row['data_availability']]) + '</strong><p>' + e(row['data_notes']) + '</p>' + link(row.get('data_url'), 'Data location / access instructions') + '</section>'
-    return f'''<article class="software-card" data-record-id="{row['id']}" id="software-{row['id']}"><div class="entry-top"><span class="entry-type">{e(CATEGORIES[row['category']])}</span>{irps}</div><h2><a href="{e(row['repository_url'])}" target="_blank" rel="noopener noreferrer">{e(row['name'])} ↗</a></h2><p class="software-authors">{e('; '.join(split(row['authors'])))}</p><p>{e(row['summary'])}</p><div class="tags">{tags}</div>{image}<section class="software-papers"><h3>Linked research</h3><ul>{''.join(related)}</ul></section><details><summary>Software details & data access</summary><dl class="detail-grid">{facts}{fact('Index', INDICES[row['index']])}{fact('Software DOI', row.get('doi'))}</dl>{data}<div class="software-links">{links}</div><p class="provenance">{e(row.get('provenance'))}</p></details><div class="software-actions"><a href="contribute.html?id={row['id']}">Suggest an update ↗</a><button class="text-button" data-copy="software/{row['id']}">Copy record link</button></div></article>'''
+    return f'''<article class="software-card" data-record-id="{row['id']}" id="software-{row['id']}"><div class="entry-top"><span class="entry-type">{e(CATEGORIES[row['category']])}</span>{irps}</div><h2><a href="{e(row['repository_url'])}" target="_blank" rel="noopener noreferrer">{e(row['name'])} ↗</a></h2><p class="software-authors">{e('; '.join(split(row['authors']))) or 'Authors not documented in source metadata'}</p><p>{e(row['summary'])}</p><div class="tags">{tags}</div>{image}<section class="software-papers"><h3>Linked research</h3>{research}</section><details><summary>Software details & data access</summary><dl class="detail-grid">{facts}{fact('Index', INDICES[row['index']])}{fact('Software DOI', row.get('doi'))}</dl>{data}<div class="software-links">{links}</div><p class="provenance">{e(row.get('provenance'))}</p></details><div class="software-actions"><a href="contribute.html?id={row['id']}">Suggest an update ↗</a><button class="text-button" data-copy="software/{row['id']}">Copy record link</button></div></article>'''
 
 
 def build():

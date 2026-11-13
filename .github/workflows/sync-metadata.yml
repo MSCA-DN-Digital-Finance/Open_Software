@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: directory-sync
+  group: software-data-sync
   cancel-in-progress: false
 jobs:
   sync:
