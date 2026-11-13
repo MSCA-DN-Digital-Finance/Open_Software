@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -51,6 +52,8 @@ class ApprovalValidationTests(unittest.TestCase):
 class ApprovalIntegrationTests(unittest.TestCase):
     """Exercise real CSV imports, builds and Git pushes against a disposable local remote."""
     def setUp(self):
+        summary = patch.dict(os.environ, {'GITHUB_STEP_SUMMARY': ''})
+        summary.start(); self.addCleanup(summary.stop)
         self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name) / 'checkout'
         self.root.mkdir()
