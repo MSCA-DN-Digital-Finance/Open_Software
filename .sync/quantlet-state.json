@@ -51091,19 +51091,25 @@
       "fingerprint": {
         "id": 1157559099,
         "full_name": "QuantLet/Replication-R-Code-Adjusted-Range-SN-Relevant-Hypotheses-FTS",
-        "pushed_at": "2026-09-12T23:44:27Z",
+        "pushed_at": "2026-11-14T12:59:56Z",
         "default_branch": "main",
         "description": "R code for relevant functional mean changes under weak directional moments",
         "language": "R",
-        "license": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION",
+          "url": null,
+          "node_id": "MDc6TGljZW5zZTA="
+        },
         "archived": false
       },
-      "commit": "0e01f56b7dc502e01f3315c7d36984df3670ca64",
+      "commit": "0106905b6668f9ff51a6a75257a806e4409fa2ce",
       "metainfo": [],
       "contributors": [
         "Jiajing-Sun"
       ],
-      "scanned_on": "2026-11-13"
+      "scanned_on": "2026-11-14"
     },
     "1164747230": {
       "fingerprint": {
