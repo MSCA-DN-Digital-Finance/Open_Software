@@ -61,6 +61,7 @@ class QuantLetTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         shutil.copytree(build_site.ROOT / 'data', self.root / 'data')
         (self.root / 'data/quantlet-software.csv').unlink(missing_ok=True)
+        (self.root / 'data/zenodo-software.csv').unlink(missing_ok=True)
         self.curated = self.root / 'data/software.csv'
         self.curated.write_text(self.curated.read_text().splitlines()[0] + '\n')
         papers = {'publications': [{'id': 'example-paper', 'title': 'Example Paper', 'doi': '10.1234/paper'}],
@@ -94,6 +95,7 @@ class QuantLetTests(unittest.TestCase):
         self.assertEqual(report['matched_repositories'], 1)
         self.assertEqual(rows[0]['id'], 'quantlet-101')
         self.assertEqual(rows[0]['irp_numbers'], '14')
+        self.assertEqual(rows[0]['category'], 'quantlet')
         self.assertEqual(rows[0]['publication_ids'], 'example-paper')
         self.assertIn('nested/METAINFO.TXT', rows[0]['provenance'])
 
@@ -121,6 +123,41 @@ class QuantLetTests(unittest.TestCase):
                                       'bio': 'https://orcid.org/0000-0002-9123-3883', 'type': 'User'}})
         self.sync(client)
         self.assertEqual(build_site.inventory(self.root)['software'], [])
+
+    def test_shared_github_handle_matches_case_insensitively_without_public_name(self):
+        people_path = self.root / 'data/people.json'
+        people = json.loads(people_path.read_text())
+        candidate = next(p['candidate'] for p in people['projects'] if p['number'] == '14')
+        candidate['links']['GitHub'] = 'https://github.com/Known-Account'
+        people_path.write_text(json.dumps(people))
+        client = FakeClient(metadata={}, contributors=[{'login': 'known-account', 'type': 'User'}],
+                            profiles={'known-account': {'login': 'known-account', 'name': None, 'type': 'User'}})
+        self.sync(client)
+        self.assertEqual(build_site.inventory(self.root)['software'][0]['irp_numbers'], '14')
+        # Existing scan is re-matched against changed identities without rescanning.
+        candidate['links'].pop('GitHub')
+        people_path.write_text(json.dumps(people))
+        client.calls.clear()
+        self.sync(client)
+        self.assertEqual(build_site.inventory(self.root)['software'], [])
+        self.assertEqual(client.calls, [])
+
+    def test_verified_handle_takes_precedence_over_incidental_profile_name(self):
+        known = quantlet.identities(self.root, quantlet.load_directory(self.root))
+        snapshot = {'metainfo': [], 'contributors': ['OCHAFF']}
+        users = {'OCHAFF': {'name': 'Mathis Jander', 'orcid': '0000-0002-9123-3883'}}
+        self.assertEqual(set(quantlet.matches(snapshot, users, known)), {'14'})
+
+    def test_explicit_metainfo_author_handles_use_shared_mapping(self):
+        known = quantlet.identities(self.root, quantlet.load_directory(self.root))
+        for credit in ['@OCHAFF', 'ochaff', 'Other Author;https://github.com/ochaff', 'Other Author and @ochaff']:
+            snapshot = {'metainfo': [{'path': 'Metainfo.txt', 'fields': {'author': credit}}], 'contributors': []}
+            with self.subTest(credit=credit):
+                self.assertEqual(set(quantlet.matches(snapshot, {}, known)), {'14'})
+        for credit in ['ochaff-someone', '@ochaff-someone', 'Submitted by ochaff']:
+            snapshot = {'metainfo': [{'path': 'Metainfo.txt', 'fields': {'author': credit}}], 'contributors': []}
+            with self.subTest(credit=credit):
+                self.assertEqual(quantlet.matches(snapshot, {}, known), {})
 
     def test_request_budget_retains_old_snapshots_and_records_pending_work(self):
         self.sync()

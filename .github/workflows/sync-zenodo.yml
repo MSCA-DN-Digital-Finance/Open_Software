@@ -1,0 +1,55 @@
+name: Sync Zenodo software
+
+on:
+  schedule:
+    - cron: '43 6 * * *' # Daily at 06:43 UTC.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: software-data-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Configure commit identity
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Sync and validate Zenodo software
+        run: |
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            python scripts/sync_metadata.py
+            python scripts/sync_zenodo.py --write
+            python update_README.py
+            python scripts/build_site.py
+            python -m unittest discover -s tests -v
+            git add -- data/people.json data/papers.json data/zenodo-software.csv README.md
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m 'chore: sync Zenodo community software'
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          echo 'Could not push Zenodo sync. Check branch rules and rerun.' >&2
+          exit 1
+      - name: Request Pages deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

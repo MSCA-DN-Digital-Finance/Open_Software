@@ -14,10 +14,10 @@ from directory import enrich, load as load_directory
 ROOT = Path(__file__).resolve().parents[1]
 FILES = {'software': 'software.csv'}
 CATEGORIES = {'paper-replication': 'Paper replication software', 'data-collection': 'Data collection software',
-              'package-release': 'Package / release', 'application': 'Application', 'other': 'Other'}
+              'package-release': 'Package / release', 'application': 'Application', 'quantlet': 'QuantLet', 'other': 'Other'}
 AVAILABILITY = {'public': 'Public data', 'on-request': 'Data on request', 'restricted': 'Restricted data',
                 'not-required': 'No external data required', 'not-documented': 'Data availability not documented'}
-INDICES = {'not-indexed': 'Not indexed', 'zenodo': 'Zenodo', 'quantlet': 'Quantlet', 'other': 'Other index'}
+INDICES = {'not-indexed': 'Not indexed', 'zenodo': 'Zenodo', 'quantlet': 'QuantLet', 'other': 'Other index'}
 
 
 def split(value):
@@ -46,12 +46,13 @@ def paper_inventory(root=None):
     return data
 
 
-def read_records(root=None, *, quantlet=False):
+def read_records(root=None, *, quantlet=False, feed=None):
     root = root or ROOT
     papers = paper_inventory(root)
     projects = load_directory(root)
     known_irps = {p['number'] for p in projects}
-    filename = 'quantlet-software.csv' if quantlet else 'software.csv'
+    imported = quantlet or feed is not None
+    filename = feed or ('quantlet-software.csv' if quantlet else 'software.csv')
     with (root / 'data' / filename).open(encoding='utf-8-sig', newline='') as source:
         reader = csv.DictReader(source)
         if not reader.fieldnames or len(reader.fieldnames) != len(set(reader.fieldnames)):
@@ -62,9 +63,9 @@ def read_records(root=None, *, quantlet=False):
         if None in row or any(value is None for value in row.values()):
             raise ValueError(f'software.csv:{line}: malformed CSV row')
         row.update({key: value.strip() for key, value in row.items()})
-        required = ['id', 'name', 'repository_url', 'summary', 'category', 'irp_numbers', 'data_availability', 'data_notes', 'index']
-        if not quantlet:
-            required += ['authors', 'languages']
+        required = ['id', 'name', 'repository_url', 'summary', 'category', 'data_availability', 'data_notes', 'index']
+        if not imported:
+            required += ['authors', 'languages', 'irp_numbers']
         for field in required:
             if not row.get(field):
                 raise ValueError(f'software.csv:{line}: {field} is required')
@@ -74,12 +75,12 @@ def read_records(root=None, *, quantlet=False):
         if row['category'] not in CATEGORIES or row['data_availability'] not in AVAILABILITY or row['index'] not in INDICES:
             raise ValueError('Invalid category, data availability or index')
         numbers = split(row['irp_numbers'])
-        if not re.fullmatch(r'[1-9]\d*(?:;[1-9]\d*)*', row['irp_numbers']) or len(numbers) != len(set(numbers)) or set(numbers) - known_irps:
+        if (row['irp_numbers'] and not re.fullmatch(r'[1-9]\d*(?:;[1-9]\d*)*', row['irp_numbers'])) or len(numbers) != len(set(numbers)) or set(numbers) - known_irps:
             raise ValueError('IRPs must be known, distinct numbers separated by semicolons')
         for field, value in row.items():
             if field.endswith('_url') and value and not validate_url(value):
                 raise ValueError(f'{field} must be a public HTTP(S) URL')
-        if not quantlet and not (split(row.get('publication_ids')) or split(row.get('working_paper_ids')) or split(row.get('paper_urls'))):
+        if not imported and not (split(row.get('publication_ids')) or split(row.get('working_paper_ids')) or split(row.get('paper_urls'))):
             raise ValueError('Link at least one published paper, working paper or external paper URL')
         for field, kind in [('publication_ids', 'publications'), ('working_paper_ids', 'working_papers')]:
             unknown = set(split(row.get(field))) - {p['id'] for p in papers[kind]}
@@ -113,22 +114,54 @@ def repository_key(url):
     parsed = urlsplit(url)
     path = parsed.path.rstrip('/')
     if parsed.hostname and parsed.hostname.lower() in {'github.com', 'www.github.com'}:
-        path = '/'.join(path.split('/')[:3])
+        parts = path.split('/')
+        if len(parts) > 2 and parts[1].casefold() == 'quantlet':
+            path = '/'.join(parts[:3])  # QuantLet entries index a whole repository.
+        elif len(parts) >= 5 and parts[3] in {'tree', 'blob', 'releases'}:
+            # Retain distinct software projects in a shared repository, but not
+            # the release/commit that changes between Zenodo versions.
+            path = '/'.join(parts[:3] + parts[5:])
     return ((parsed.hostname or '').lower(), re.sub(r'\.git$', '', path, flags=re.I).lower())
+
+
+def merge_imports(existing, incoming):
+    """Combine matching automated sources while keeping the QuantLet record ID."""
+    merged = {key: existing.get(key) or value for key, value in incoming.items()}
+    for field in ['authors', 'contributors', 'languages', 'irp_numbers', 'publication_ids', 'working_paper_ids']:
+        merged[field] = ';'.join(dict.fromkeys(split(existing.get(field)) + split(incoming.get(field))))
+    titles = {}
+    for row in [existing, incoming]:
+        labels = split(row.get('paper_titles'))
+        for i, url in enumerate(split(row.get('paper_urls'))):
+            titles.setdefault(url, labels[i] if labels else url)
+    merged['paper_urls'] = ';'.join(titles)
+    merged['paper_titles'] = ';'.join(titles.values())
+    if incoming['index'] == 'zenodo':
+        for field in ['index', 'index_url', 'doi', 'version']:
+            merged[field] = incoming.get(field) or merged.get(field, '')
+    merged['last_updated'] = max(existing.get('last_updated', ''), incoming.get('last_updated', ''))
+    merged['provenance'] = existing.get('provenance', '') + ' ' + incoming.get('provenance', '')
+    return merged
 
 
 def inventory(root=None):
     root = root or ROOT
     curated = read_records(root)
-    if not (root / 'data/quantlet-software.csv').exists():
-        return {'software': curated}
-    imported = read_records(root, quantlet=True)
-    ids = {row['id'] for row in curated}
-    repositories = {repository_key(row['repository_url']) for row in curated}
-    dois = {normalized_doi(row['doi']) for row in curated if row.get('doi')}
-    imported = [row for row in imported if row['id'] not in ids and repository_key(row['repository_url']) not in repositories
-                and (not row.get('doi') or normalized_doi(row['doi']) not in dois)]
-    return {'software': curated + imported}
+    combined = list(curated)
+    for feed in ['quantlet-software.csv', 'zenodo-software.csv']:
+        if not (root / 'data' / feed).exists():
+            continue
+        for row in read_records(root, feed=feed):
+            matches = [i for i, old in enumerate(combined) if old['id'] == row['id'] or
+                       repository_key(old['repository_url']) == repository_key(row['repository_url']) or
+                       (row.get('doi') and old.get('doi') and normalized_doi(old['doi']) == normalized_doi(row['doi']))]
+            if len(matches) > 1:
+                raise ValueError('Software sources identify conflicting duplicate records; review their repository URLs and DOIs')
+            if not matches:
+                combined.append(row)
+            elif matches[0] >= len(curated):
+                combined[matches[0]] = merge_imports(combined[matches[0]], row)
+    return {'software': combined}
 
 
 def e(value):
@@ -148,14 +181,16 @@ def render_record(row, papers):
     external_titles = split(row.get('paper_titles'))
     related += ['<li>' + link(url, external_titles[i] if external_titles else 'External paper · ' + urlsplit(url).netloc) + '</li>'
                 for i, url in enumerate(split(row.get('paper_urls')))]
-    research = '<ul>' + ''.join(related) + '</ul>' if related else '<p class="muted">Paper link not yet documented. See the source Metainfo for its research context.</p>'
+    research = '<ul>' + ''.join(related) + '</ul>' if related else '<p class="muted">Paper link not yet documented. See the source metadata for its research context.</p>'
     tags = ''.join('<span class="tag">' + e(language) + '</span>' for language in split(row['languages']))
     irps = ''.join(f'<a class="irp-pill" href="/irps/irp-{number}.html">IRP {number}</a>' for number in split(row['irp_numbers']))
+    irps = irps or '<span class="tag">IRP not assigned</span>'
     image = f'<figure class="software-figure"><img src="{e(row["key_image_url"])}" alt="{e(row["key_image_alt"])}" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>{e(row.get("key_image_caption"))}</figcaption></figure>' if row.get('key_image_url') else ''
     facts = ''.join(fact(label, row.get(field)) for label, field in [('Authors', 'authors'), ('Contributors', 'contributors'),
         ('Doctoral candidates', 'researcher_names'), ('Research projects', 'irp_titles'), ('Languages', 'languages'),
         ('Software licence', 'license'), ('Version / release', 'version'), ('Last metadata update', 'last_updated')])
-    links = link(row['repository_url'], 'Source repository', 'button small') + link(row.get('documentation_url'), 'Documentation') + link(row.get('index_url'), INDICES[row['index']])
+    source_label = 'Software archive' if urlsplit(row['repository_url']).hostname == 'zenodo.org' else 'Source repository'
+    links = link(row['repository_url'], source_label, 'button small') + link(row.get('documentation_url'), 'Documentation') + link(row.get('index_url'), INDICES[row['index']])
     if row.get('doi'):
         links += link('https://doi.org/' + row['doi'], 'DOI: ' + row['doi'])
     data = '<section class="software-data"><h3>Data availability</h3><strong>' + e(AVAILABILITY[row['data_availability']]) + '</strong><p>' + e(row['data_notes']) + '</p>' + link(row.get('data_url'), 'Data location / access instructions') + '</section>'

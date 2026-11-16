@@ -26,6 +26,7 @@ class SoftwareTests(unittest.TestCase):
         shutil.copytree(build_site.ROOT / 'data', self.root / 'data')
         shutil.copytree(build_site.ROOT / 'site', self.root / 'site')
         (self.root / 'data/quantlet-software.csv').unlink(missing_ok=True)
+        (self.root / 'data/zenodo-software.csv').unlink(missing_ok=True)
         self.target = self.root / 'data/software.csv'
         self.target.write_text(self.target.read_text().splitlines()[0] + '\n')
         for module in [build_site, import_proposal]:
@@ -66,8 +67,9 @@ class SoftwareTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError): self.apply({**row, **change, 'id': 'new-code'})
 
     def test_quantlet_record_does_not_require_doi(self):
-        self.apply({**RECORD, 'index': 'quantlet', 'index_url': 'https://quantlet.com/project/example'})
+        self.apply({**RECORD, 'category': 'quantlet', 'index': 'quantlet', 'index_url': 'https://quantlet.com/project/example'})
         self.assertEqual(build_site.inventory()['software'][0]['index'], 'quantlet')
+        self.assertEqual(build_site.inventory()['software'][0]['category'], 'quantlet')
 
     def test_optional_plot_needs_direct_public_image_and_alt_text(self):
         for fields in [{'key_image_url': 'https://example.org/plot.png'},

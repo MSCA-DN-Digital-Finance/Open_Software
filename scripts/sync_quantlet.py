@@ -258,6 +258,12 @@ def identities(root, projects):
                 raise ValueError('Invalid verified GitHub handle')
             identity['names'] += names
             identity['logins'] += [login.casefold() for login in logins]
+    logins = {}
+    for identity in result:
+        for login in identity['logins']:
+            if login in logins and logins[login] != identity['candidate_id']:
+                raise ValueError('A GitHub account cannot identify two candidates')
+            logins[login] = identity['candidate_id']
     return result
 
 
@@ -281,14 +287,21 @@ def matches(snapshot, users, known):
             for identity in known:
                 credited = fields.get(field, '')
                 orcids = {value.upper() for value in re.findall(r'(?<!\d)(\d{4}-\d{4}-\d{4}-\d{3}[\dXx])(?!\d)', credited)}
-                if name_matches(credited, identity['names']) or (identity['orcid'] and identity['orcid'] in orcids):
+                handles = {login.casefold() for login in re.findall(r'(?<![\w-])@([A-Za-z0-9-]+)', credited)}
+                handles.update(login.casefold() for login in re.findall(r'https?://github\.com/([A-Za-z0-9-]+)(?=[/\s,;\])]|$)', credited, re.I))
+                handles.update(part.strip(' \t\"\'[]()').casefold() for part in re.split(r'[;,\n]|\s+(?:and|&)\s+', credited, flags=re.I)
+                               if re.fullmatch(r'[A-Za-z0-9-]+', part.strip(' \t\"\'[]()')))
+                if (name_matches(credited, identity['names']) or (identity['orcid'] and identity['orcid'] in orcids)
+                        or handles.intersection(identity['logins'])):
                     found.setdefault(identity['number'], []).append(f'Metainfo {field}: {meta["path"]}')
     for login in snapshot['contributors']:
         profile = users[login]
-        candidates = [identity for identity in known if login.casefold() in identity['logins'] or
-                      (identity['orcid'] and identity['orcid'] == profile.get('orcid')) or name_matches(profile['name'], identity['names'])]
-        candidates = [identity for identity in candidates if not (identity['orcid'] and profile.get('orcid') and
-                      identity['orcid'] != profile['orcid'])]
+        candidates = [identity for identity in known if login.casefold() in identity['logins']]
+        if not candidates:
+            candidates = [identity for identity in known if
+                          (identity['orcid'] and identity['orcid'] == profile.get('orcid')) or name_matches(profile['name'], identity['names'])]
+            candidates = [identity for identity in candidates if not (identity['orcid'] and profile.get('orcid') and
+                          identity['orcid'] != profile['orcid'])]
         if len(candidates) == 1:
             found.setdefault(candidates[0]['number'], []).append('GitHub contributor: ' + login)
     # A shared author-name alias must not assign two different people.
@@ -342,7 +355,7 @@ def record(repo, snapshot, users, evidence, fields, papers):
     name = (primary['fields'].get('nameofquantlet') or primary['fields'].get('name')) if '/' not in primary['path'] else ''
     row.update(id='quantlet-' + str(repo['id']), name=name or repo['name'],
                repository_url=source, summary=description or f'QuantLet repository associated with {len(evidence)} network IRP(s). See its source metadata for a description.',
-               category='other', authors=authors, contributors=names, languages=repo.get('language') or '',
+               category='quantlet', authors=authors, contributors=names, languages=repo.get('language') or '',
                irp_numbers=';'.join(sorted(evidence, key=int)), index='quantlet', index_url=source,
                license=(repo.get('license') or {}).get('spdx_id') or '', data_availability='not-documented',
                data_notes='Data availability and access conditions have not been independently verified. Consult the repository and its Metainfo files.',
@@ -350,7 +363,7 @@ def record(repo, snapshot, users, evidence, fields, papers):
                last_updated=(repo.get('pushed_at') or '')[:10],
                provenance=f'Imported from {source} at commit {snapshot["commit"]}. Matched by {details}. ' +
                           (f'Source Published in: {reference}. ' if reference else '') +
-                          'Names are matched against the shared IRP directory; no authorship, category, paper status or data access is inferred from repository topics.')
+                          'Identities are matched against the shared IRP directory; no authorship, paper status or data access is inferred from repository topics.')
     row.update(linked_papers(metadata, papers))
     if row['license'] in {'NOASSERTION', 'NONE'}:
         row['license'] = ''

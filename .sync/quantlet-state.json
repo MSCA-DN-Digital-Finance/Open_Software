@@ -13509,14 +13509,14 @@
       "fingerprint": {
         "id": 72103182,
         "full_name": "QuantLet/SFE",
-        "pushed_at": "2026-10-26T18:05:47Z",
+        "pushed_at": "2026-11-16T17:02:04Z",
         "default_branch": "master",
         "description": "Quantnet: SFE quantlets",
         "language": "R",
         "license": null,
         "archived": false
       },
-      "commit": "20d7e3f50611267efa54d72ccd3d64396316f8b3",
+      "commit": "a84ce92d9fda830b1970da18839c00daaa914e49",
       "metainfo": [
         {
           "path": "QID-1137-SFEfgnacf/Metainfo.txt",
@@ -15166,7 +15166,7 @@
         "ochaff",
         "yxxexe"
       ],
-      "scanned_on": "2026-11-13"
+      "scanned_on": "2026-11-16"
     },
     "72649752": {
       "fingerprint": {
@@ -47286,14 +47286,14 @@
       "fingerprint": {
         "id": 1137415271,
         "full_name": "QuantLet/onchain-insights",
-        "pushed_at": "2026-11-03T10:00:33Z",
+        "pushed_at": "2026-11-16T16:49:13Z",
         "default_branch": "main",
         "description": "Data collection and analysis for onchain liquidity reserves for stablecoin pairs",
         "language": "Jupyter Notebook",
         "license": null,
         "archived": false
       },
-      "commit": "303c6399357a00e11897aa30e598bc6f23b6fb45",
+      "commit": "d9d5496be071743f5303b1c07f9fede3cb1ff560",
       "metainfo": [
         {
           "path": "1. USDE binance depeg/Metainfo.txt",
@@ -47439,7 +47439,7 @@
         "ochaff",
         "ochaffard"
       ],
-      "scanned_on": "2026-11-13"
+      "scanned_on": "2026-11-16"
     },
     "1146941736": {
       "fingerprint": {
