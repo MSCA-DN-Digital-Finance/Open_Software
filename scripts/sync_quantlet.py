@@ -28,6 +28,9 @@ from build_site import ROOT, inventory, normalized_doi, paper_inventory, split, 
 from directory import load as load_directory, name_key, orcid_id, write_json
 
 OWNER = 'QuantLet'
+# IRP 7 maintains QuantLet broadly; only an explicit full-name author credit
+# establishes a research association for this candidate.
+AUTHOR_LIST_ONLY_IRPS = {'7'}
 FEED = 'quantlet-software.csv'
 STATE = '.sync/quantlet-state.json'
 USER_AGENT = 'DigitalFinanceQuantLetSync/1.0 (+https://github.com/MSCA-DN-Digital-Finance/Open_Software)'
@@ -286,6 +289,10 @@ def matches(snapshot, users, known):
         for field in ['author', 'authors', 'contributor', 'contributors']:
             for identity in known:
                 credited = fields.get(field, '')
+                if identity['number'] in AUTHOR_LIST_ONLY_IRPS:
+                    if field in {'author', 'authors'} and name_matches(credited, identity['names']):
+                        found.setdefault(identity['number'], []).append(f'Metainfo {field}: {meta["path"]}')
+                    continue
                 orcids = {value.upper() for value in re.findall(r'(?<!\d)(\d{4}-\d{4}-\d{4}-\d{3}[\dXx])(?!\d)', credited)}
                 handles = {login.casefold() for login in re.findall(r'(?<![\w-])@([A-Za-z0-9-]+)', credited)}
                 handles.update(login.casefold() for login in re.findall(r'https?://github\.com/([A-Za-z0-9-]+)(?=[/\s,;\])]|$)', credited, re.I))
@@ -302,7 +309,7 @@ def matches(snapshot, users, known):
                           (identity['orcid'] and identity['orcid'] == profile.get('orcid')) or name_matches(profile['name'], identity['names'])]
             candidates = [identity for identity in candidates if not (identity['orcid'] and profile.get('orcid') and
                           identity['orcid'] != profile['orcid'])]
-        if len(candidates) == 1:
+        if len(candidates) == 1 and candidates[0]['number'] not in AUTHOR_LIST_ONLY_IRPS:
             found.setdefault(candidates[0]['number'], []).append('GitHub contributor: ' + login)
     # A shared author-name alias must not assign two different people.
     ambiguous = {name_key(name) for identity in known for name in identity['names']

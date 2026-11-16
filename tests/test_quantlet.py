@@ -110,6 +110,55 @@ class QuantLetTests(unittest.TestCase):
         self.assertIn('GitHub contributor: known-person', row['provenance'])
         self.assertIn('Paper link not yet documented', build_site.render_record(row, build_site.paper_inventory(self.root)))
 
+    def test_irp7_requires_full_name_in_author_list_with_accents_and_name_order_variants(self):
+        known = quantlet.identities(self.root, quantlet.load_directory(self.root))
+        for field in ['author', 'authors']:
+            for credit in ['Ștefan Găman', 'Stefan Gaman', 'Ştefan Găman', 'Gaman, Stefan',
+                           'STEFAN GAMAN', 'Other Scholar;Ștefan Găman', '["Other Scholar", "Stefan Gaman"]']:
+                snapshot = {'metainfo': [{'path': 'nested/Metainfo.txt', 'fields': {field: credit}}], 'contributors': []}
+                with self.subTest(field=field, credit=credit):
+                    self.assertEqual(quantlet.matches(snapshot, {}, known), {'7': [f'Metainfo {field}: nested/Metainfo.txt']})
+
+    def test_irp7_contributor_credits_handles_orcid_and_partial_author_names_do_not_qualify(self):
+        known = quantlet.identities(self.root, quantlet.load_directory(self.root))
+        irp7 = next(identity for identity in known if identity['number'] == '7')
+        fields = [{'contributor': 'Ștefan Găman'}, {'contributors': 'Stefan Gaman'}, {'author': '@StefanGam'},
+                  {'authors': 'https://github.com/StefanGam'}, {'author': 'StefanGam'}, {'author': 'S. Gaman'},
+                  {'author': 'Stefan Gamanson'}, {'author': irp7['orcid']}, {}]
+        profiles = {'StefanGam': {'name': 'Ștefan Găman', 'orcid': irp7['orcid']},
+                    'other-account': {'name': 'Stefan Gaman', 'orcid': irp7['orcid']}}
+        for metadata in fields:
+            snapshot = {'metainfo': [{'path': 'Metainfo.txt', 'fields': metadata}], 'contributors': list(profiles)}
+            with self.subTest(fields=metadata):
+                self.assertEqual(quantlet.matches(snapshot, profiles, known), {})
+
+    def test_irp7_maintenance_does_not_remove_other_candidates_and_cached_feed_is_corrected(self):
+        client = FakeClient(metadata={'Metainfo.txt': 'Author: Owen Chaffard'},
+                            contributors=[{'login': 'StefanGam', 'type': 'User'}],
+                            profiles={'StefanGam': {'login': 'StefanGam', 'name': 'Stefan Gaman', 'type': 'User'}})
+        # Simulate a feed produced by the previous contributor-matching policy.
+        with patch.object(quantlet, 'AUTHOR_LIST_ONLY_IRPS', set()):
+            self.sync(client)
+        self.assertEqual(build_site.inventory(self.root)['software'][0]['irp_numbers'], '7;14')
+        client.calls.clear()
+        self.sync(client)
+        row = build_site.inventory(self.root)['software'][0]
+        self.assertEqual(row['irp_numbers'], '14')
+        self.assertNotIn('IRP 7:', row['provenance'])
+        self.assertEqual(client.calls, [])
+
+    def test_irp7_maintenance_only_repository_is_pruned_on_cached_refresh(self):
+        client = FakeClient(metadata={'Metainfo.txt': 'Author: Other Scholar'},
+                            contributors=[{'login': 'StefanGam', 'type': 'User'}],
+                            profiles={'StefanGam': {'login': 'StefanGam', 'name': 'Stefan Gaman', 'type': 'User'}})
+        with patch.object(quantlet, 'AUTHOR_LIST_ONLY_IRPS', set()):
+            self.sync(client)
+        self.assertEqual(build_site.inventory(self.root)['software'][0]['irp_numbers'], '7')
+        client.calls.clear()
+        self.sync(client)
+        self.assertEqual(build_site.inventory(self.root)['software'], [])
+        self.assertEqual(client.calls, [])
+
     def test_non_candidate_authors_and_anonymous_handles_do_not_qualify(self):
         client = FakeClient(metadata={'Metainfo.txt': 'Author: Other Scholar\nSubmitted: Owen Chaffard'},
                             contributors=[{'login': 'unknown-person', 'type': 'User'}],
