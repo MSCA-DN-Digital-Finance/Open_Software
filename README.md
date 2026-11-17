@@ -201,6 +201,7 @@ python3 scripts/sync_zenodo.py --write  # Refresh the generated feed
 | Software | Category | IRP | Language |
 | --- | --- | --- | --- |
 | [TSFM causal analysis](https://github.com/MSCA-DN-Digital-Finance/tsfm_causal_analysis) | Paper replication software | 1 | Python;Jupyter Notebook;PowerShell |
+| [Hierarchical Loan forecasting : A study of End-to-End coherent models](https://github.com/QuantLet/Hierarchical-Loan-Forecasting) | Paper replication software | 14 | Python |
 | [MSM](https://github.com/QuantLet/MSM) | QuantLet | 12;13 | Jupyter Notebook |
 | [SFE_class_2015](https://github.com/QuantLet/SFE_class_2015) | QuantLet | 7;12;15 | Jupyter Notebook |
 | [SFM2-SS16-ToDo](https://github.com/QuantLet/SFM2-SS16-ToDo) | QuantLet | 11 | Jupyter Notebook |
@@ -217,7 +218,6 @@ python3 scripts/sync_zenodo.py --write  # Refresh the generated feed
 | [ETH_Event_Study](https://github.com/QuantLet/ETH_Event_Study) | QuantLet | 7 | R |
 | [LLM4Forecasting](https://github.com/QuantLet/LLM4Forecasting) | QuantLet | 12 | Jupyter Notebook |
 | [Quantlet_The_Code_Snippet_Knowledge_Platform](https://github.com/QuantLet/Quantlet_The_Code_Snippet_Knowledge_Platform) | QuantLet | 7 | Python |
-| [Hierarchical Loan forecasting : A study of End-to-End coherent models](https://github.com/QuantLet/Hierarchical-Loan-Forecasting) | QuantLet | 14 | Jupyter Notebook |
 | [Decomposing-Stock-Factors](https://github.com/QuantLet/Decomposing-Stock-Factors) | QuantLet | 15 | Jupyter Notebook |
 | [CentralBank2StockMarket](https://github.com/QuantLet/CentralBank2StockMarket) | QuantLet | 12 | Jupyter Notebook |
 | [Fraud Detection](https://github.com/QuantLet/Fraud-Detection-Demo) | QuantLet | 8 | Jupyter Notebook |
