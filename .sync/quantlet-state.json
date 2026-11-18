@@ -47286,14 +47286,14 @@
       "fingerprint": {
         "id": 1137415271,
         "full_name": "QuantLet/onchain-insights",
-        "pushed_at": "2026-11-17T15:42:26Z",
+        "pushed_at": "2026-11-18T11:27:39Z",
         "default_branch": "main",
         "description": "Data collection and analysis for onchain liquidity reserves for stablecoin pairs",
         "language": "Jupyter Notebook",
         "license": null,
         "archived": false
       },
-      "commit": "8591b6826168849c92a7f2a0710e666464f3cc23",
+      "commit": "17b94ee48e95dd82d16b1c0a3383e500f98167d4",
       "metainfo": [
         {
           "path": "1. USDE binance depeg/Metainfo.txt",
@@ -47439,7 +47439,7 @@
         "ochaff",
         "ochaffard"
       ],
-      "scanned_on": "2026-11-17"
+      "scanned_on": "2026-11-18"
     },
     "1146941736": {
       "fingerprint": {
