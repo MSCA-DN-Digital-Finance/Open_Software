@@ -10,7 +10,7 @@ Research software catalogue for the MSCA Digital Finance network.
 `data/software.csv` indexes software names, source repository links, descriptions,
 authors and contributors, programming languages, IRPs, linked publications and
 working papers, software index records (Quantlet, Zenodo or another index), software
-DOIs, licences/releases, and data availability notes and links. An optional key
+DOIs, repository creation dates, licences/releases, and data availability notes and links. An optional key
 image can show a plot from the source repository, with alt text and a caption/credit.
 
 Categories are `paper-replication`, `data-collection`, `package-release`,
@@ -134,8 +134,14 @@ Paper IDs are linked only on an exact normalized title, DOI or URL match. A long
 `Name of Quantlet` is also compared when it is identical to a full paper title. Explicit
 publication URLs become external paper links. A study title without a resolvable
 paper link is retained in provenance, with a visible missing-link message. A paper
-DOI is never reused as the software DOI; only an explicit `Software DOI` field can
-populate that value. Source code, notebooks and YAML objects are never executed.
+DOI is never reused as the software DOI. The import reads explicit `Software DOI`
+fields from Metainfo and collects separate `quantlet_dois` from the
+[QuantLet cards API](https://quantlet.com/api/cards/home), matched by the GitHub
+owner and repository in each card's source URL. Repositories with several citable
+Quantlets show an expandable DOI list. If the QuantLet API is unavailable, the
+sync retains previously fetched identifiers. The `repository_created_at` column
+uses the date portion of GitHub's `created_at` timestamp. Source code, notebooks
+and YAML objects are never executed.
 
 `.sync/quantlet-state.json` is the committed incremental checkpoint. Unchanged
 repositories are reused and candidate matching is reevaluated against the current
@@ -198,53 +204,53 @@ python3 scripts/sync_zenodo.py --write  # Refresh the generated feed
 <!-- BEGIN SOFTWARE -->
 47 software record(s).
 
-| Software | Category | IRP | Language |
-| --- | --- | --- | --- |
-| [TSFM causal analysis](https://github.com/MSCA-DN-Digital-Finance/tsfm_causal_analysis) | Paper replication software | 1 | Python;Jupyter Notebook;PowerShell |
-| [Hierarchical Loan forecasting : A study of End-to-End coherent models](https://github.com/QuantLet/Hierarchical-Loan-Forecasting) | Paper replication software | 14 | Python |
-| [MSM](https://github.com/QuantLet/MSM) | QuantLet | 12;13 | Jupyter Notebook |
-| [SFE_class_2015](https://github.com/QuantLet/SFE_class_2015) | QuantLet | 7;12;15 | Jupyter Notebook |
-| [SFM2-SS16-ToDo](https://github.com/QuantLet/SFM2-SS16-ToDo) | QuantLet | 11 | Jupyter Notebook |
-| [SFE](https://github.com/QuantLet/SFE) | QuantLet | 14;15 | R |
-| [MVA](https://github.com/QuantLet/MVA) | QuantLet | 8 | Jupyter Notebook |
-| [SPM](https://github.com/QuantLet/SPM) | QuantLet | 7 | Jupyter Notebook |
-| [DeepLearning](https://github.com/QuantLet/DeepLearning) | QuantLet | 12 | Jupyter Notebook |
-| [DigitalEconomyDecisionAnalytics](https://github.com/QuantLet/DigitalEconomyDecisionAnalytics) | QuantLet | 8 | HTML |
-| [DEDA_2022_NYCU](https://github.com/QuantLet/DEDA_2022_NYCU) | QuantLet | 8 | Jupyter Notebook |
-| [FRM-Taiwan](https://github.com/QuantLet/FRM-Taiwan) | QuantLet | 8 | Jupyter Notebook |
-| [DEDA_2024_NYCU](https://github.com/QuantLet/DEDA_2024_NYCU) | QuantLet | 8 | Python |
-| [Metcalfe_Law_and_LPPL_Crypto](https://github.com/QuantLet/Metcalfe_Law_and_LPPL_Crypto) | QuantLet | 15 | Jupyter Notebook |
-| [Crypto_Currency_Returns](https://github.com/QuantLet/Crypto_Currency_Returns) | QuantLet | 7;8 | Jupyter Notebook |
-| [ETH_Event_Study](https://github.com/QuantLet/ETH_Event_Study) | QuantLet | 7 | R |
-| [LLM4Forecasting](https://github.com/QuantLet/LLM4Forecasting) | QuantLet | 12 | Jupyter Notebook |
-| [Quantlet_The_Code_Snippet_Knowledge_Platform](https://github.com/QuantLet/Quantlet_The_Code_Snippet_Knowledge_Platform) | QuantLet | 7 | Python |
-| [Decomposing-Stock-Factors](https://github.com/QuantLet/Decomposing-Stock-Factors) | QuantLet | 15 | Jupyter Notebook |
-| [CentralBank2StockMarket](https://github.com/QuantLet/CentralBank2StockMarket) | QuantLet | 12 | Jupyter Notebook |
-| [Fraud Detection](https://github.com/QuantLet/Fraud-Detection-Demo) | QuantLet | 8 | Jupyter Notebook |
-| [WP3_eXplainable_and_Fair_AI](https://github.com/QuantLet/WP3_eXplainable_and_Fair_AI) | QuantLet | 1;12;17 |  |
-| [Courses](https://github.com/QuantLet/Courses) | QuantLet | 1;8;9;11;12;13;14 | Jupyter Notebook |
-| [GRU](https://github.com/QuantLet/GRU) | QuantLet | 12 | Jupyter Notebook |
-| [DEDA_2025_CUEB](https://github.com/QuantLet/DEDA_2025_CUEB) | QuantLet | 8 | Jupyter Notebook |
-| [Stable_Distribution](https://github.com/QuantLet/Stable_Distribution) | QuantLet | 7;12 | Jupyter Notebook |
-| [Proper Scoring Rules](https://github.com/QuantLet/Proper-Scoring-Rules) | QuantLet | 14 | Jupyter Notebook |
-| [LLMs-for-BTC-TS](https://github.com/QuantLet/LLMs-for-BTC-TS) | QuantLet | 14 | Jupyter Notebook |
-| [2025_HTW_ESG_Portfolio_Optimization](https://github.com/QuantLet/ESG-Portfolio-Optimization) | QuantLet | 8;12 | Jupyter Notebook |
-| [Hierarchical Time Series : A geometric approach](https://github.com/QuantLet/HTS_visualization) | QuantLet | 14 | Jupyter Notebook |
-| [Whitepaper_CC_Indices](https://github.com/QuantLet/Whitepaper_CC_Indices) | QuantLet | 7 | Python |
-| [A_New_EMD_Approach](https://github.com/QuantLet/A_New_EMD_Approach) | QuantLet | 8 | Jupyter Notebook |
-| [01 FINDER-LLM](https://github.com/QuantLet/FINDER-LLM) | QuantLet | 7;8;12 | Jupyter Notebook |
-| [fulvio-PhD](https://github.com/QuantLet/fulvio-PhD) | QuantLet | 13 |  |
-| [Onchain Insights](https://github.com/QuantLet/onchain-insights) | QuantLet | 8;14 | Jupyter Notebook |
-| [Transparent-Movie](https://github.com/QuantLet/Transparent-Movie-Instruction) | QuantLet | 8 | Jupyter Notebook |
-| [AI_Listening2CB](https://github.com/QuantLet/AI_Listening2CB) | QuantLet | 12 | Jupyter Notebook |
-| [Network_Centrality](https://github.com/QuantLet/Network_Centrality) | QuantLet | 14 | Jupyter Notebook |
-| [TSFM_VaR_CEE](https://github.com/QuantLet/TSFM_VaR_CEE) | QuantLet | 8 | Jupyter Notebook |
-| [XAI_beyond_SHAP](https://github.com/QuantLet/XAI_beyond_SHAP) | QuantLet | 14 |  |
-| [MSR](https://github.com/QuantLet/MSR) | QuantLet | 7 | Jupyter Notebook |
-| [FATED-Polymarket](https://github.com/QuantLet/FATED-Polymarket) | QuantLet | 7;14 | Jupyter Notebook |
-| [STMS_Delta](https://github.com/QuantLet/Delta-Method) | QuantLet | 15 | Jupyter Notebook |
-| [Electricity-Portfolio-Hedging](https://github.com/QuantLet/Electricity-Portfolio-Hedging) | QuantLet | 8 | Jupyter Notebook |
-| [Polymarked](https://github.com/QuantLet/Polymarked) | QuantLet | 14 |  |
-| [Code and Data for Reinforcement Learning in Finance: From Current Practice to Standards and Frameworks](https://github.com/MSCA-DN-Digital-Finance/WP3_eXplainable_and_Fair_AI/tree/f84806bad3edebba538633870a57ce81eaf511e5/IRP1/Code/systematic_literature_review) | Other | 1 | Python |
-| [MSCA-DN-Digital-Finance/stablecoin-onchain-data: DeFi hourly datasets data-2026-02-02](https://github.com/MSCA-DN-Digital-Finance/stablecoin-onchain-data) | Other | 14 |  |
+| Software | Category | IRP | Language | Repository created | DOI |
+| --- | --- | --- | --- | --- | --- |
+| [TSFM causal analysis](https://github.com/MSCA-DN-Digital-Finance/tsfm_causal_analysis) | Paper replication software | 1 | Python;Jupyter Notebook;PowerShell | — | — |
+| [Hierarchical Loan forecasting : A study of End-to-End coherent models](https://github.com/QuantLet/Hierarchical-Loan-Forecasting) | Paper replication software | 14 | Python | 2025-02-20 | [10.24818/ida-ql/2025.192](https://doi.org/10.24818/ida-ql/2025.192) |
+| [MSM](https://github.com/QuantLet/MSM) | QuantLet | 12;13 | Jupyter Notebook | 2015-10-19 | [13 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-44526513) |
+| [SFE_class_2015](https://github.com/QuantLet/SFE_class_2015) | QuantLet | 7;12;15 | Jupyter Notebook | 2015-12-04 | [21 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-47378199) |
+| [SFM2-SS16-ToDo](https://github.com/QuantLet/SFM2-SS16-ToDo) | QuantLet | 11 | Jupyter Notebook | 2016-05-02 | [10 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-57884663) |
+| [SFE](https://github.com/QuantLet/SFE) | QuantLet | 14;15 | R | 2016-10-27 | [175 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-72103182) |
+| [MVA](https://github.com/QuantLet/MVA) | QuantLet | 8 | Jupyter Notebook | 2016-11-08 | [169 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-73212746) |
+| [SPM](https://github.com/QuantLet/SPM) | QuantLet | 7 | Jupyter Notebook | 2016-11-30 | [62 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-75185183) |
+| [DeepLearning](https://github.com/QuantLet/DeepLearning) | QuantLet | 12 | Jupyter Notebook | 2019-02-05 | [8 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-169274763) |
+| [DigitalEconomyDecisionAnalytics](https://github.com/QuantLet/DigitalEconomyDecisionAnalytics) | QuantLet | 8 | HTML | 2019-10-18 | [15 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-216023169) |
+| [DEDA_2022_NYCU](https://github.com/QuantLet/DEDA_2022_NYCU) | QuantLet | 8 | Jupyter Notebook | 2022-09-04 | [59 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-532534735) |
+| [FRM-Taiwan](https://github.com/QuantLet/FRM-Taiwan) | QuantLet | 8 | Jupyter Notebook | 2023-12-02 | [10.24818/ida-ql/2024.55](https://doi.org/10.24818/ida-ql/2024.55) |
+| [DEDA_2024_NYCU](https://github.com/QuantLet/DEDA_2024_NYCU) | QuantLet | 8 | Python | 2024-04-24 | [10.24818/ida-ql/2024.39](https://doi.org/10.24818/ida-ql/2024.39) |
+| [Metcalfe_Law_and_LPPL_Crypto](https://github.com/QuantLet/Metcalfe_Law_and_LPPL_Crypto) | QuantLet | 15 | Jupyter Notebook | 2024-05-08 | [2 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-797956288) |
+| [Crypto_Currency_Returns](https://github.com/QuantLet/Crypto_Currency_Returns) | QuantLet | 7;8 | Jupyter Notebook | 2025-01-14 | [10.24818/ida-ql/2025.68](https://doi.org/10.24818/ida-ql/2025.68) |
+| [ETH_Event_Study](https://github.com/QuantLet/ETH_Event_Study) | QuantLet | 7 | R | 2025-01-14 | [4 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-916608642) |
+| [LLM4Forecasting](https://github.com/QuantLet/LLM4Forecasting) | QuantLet | 12 | Jupyter Notebook | 2025-01-15 | [10.24818/ida-ql/2025.199](https://doi.org/10.24818/ida-ql/2025.199) |
+| [Quantlet_The_Code_Snippet_Knowledge_Platform](https://github.com/QuantLet/Quantlet_The_Code_Snippet_Knowledge_Platform) | QuantLet | 7 | Python | 2025-02-10 | [4 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-930337401) |
+| [Decomposing-Stock-Factors](https://github.com/QuantLet/Decomposing-Stock-Factors) | QuantLet | 15 | Jupyter Notebook | 2025-03-05 | [5 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-943511540) |
+| [CentralBank2StockMarket](https://github.com/QuantLet/CentralBank2StockMarket) | QuantLet | 12 | Jupyter Notebook | 2025-03-09 | [10.24818/ida-ql/2024.29](https://doi.org/10.24818/ida-ql/2024.29) |
+| [Fraud Detection](https://github.com/QuantLet/Fraud-Detection-Demo) | QuantLet | 8 | Jupyter Notebook | 2025-04-11 | [10.24818/ida-ql/2025.182](https://doi.org/10.24818/ida-ql/2025.182) |
+| [WP3_eXplainable_and_Fair_AI](https://github.com/QuantLet/WP3_eXplainable_and_Fair_AI) | QuantLet | 1;12;17 |  | 2025-05-20 | — |
+| [Courses](https://github.com/QuantLet/Courses) | QuantLet | 1;8;9;11;12;13;14 | Jupyter Notebook | 2025-05-20 | [10.24818/ida-ql/2025.67](https://doi.org/10.24818/ida-ql/2025.67) |
+| [GRU](https://github.com/QuantLet/GRU) | QuantLet | 12 | Jupyter Notebook | 2025-06-09 | [3 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-999203205) |
+| [DEDA_2025_CUEB](https://github.com/QuantLet/DEDA_2025_CUEB) | QuantLet | 8 | Jupyter Notebook | 2025-07-09 | [25 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1016737398) |
+| [Stable_Distribution](https://github.com/QuantLet/Stable_Distribution) | QuantLet | 7;12 | Jupyter Notebook | 2025-07-23 | [10.24818/ida-ql/2025.240](https://doi.org/10.24818/ida-ql/2025.240) |
+| [Proper Scoring Rules](https://github.com/QuantLet/Proper-Scoring-Rules) | QuantLet | 14 | Jupyter Notebook | 2025-08-05 | [6 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1032370311) |
+| [LLMs-for-BTC-TS](https://github.com/QuantLet/LLMs-for-BTC-TS) | QuantLet | 14 | Jupyter Notebook | 2025-09-23 | [10.24818/ida-ql/2025.201](https://doi.org/10.24818/ida-ql/2025.201) |
+| [2025_HTW_ESG_Portfolio_Optimization](https://github.com/QuantLet/ESG-Portfolio-Optimization) | QuantLet | 8;12 | Jupyter Notebook | 2025-10-10 | [10.24818/ida-ql/2025.1](https://doi.org/10.24818/ida-ql/2025.1) |
+| [Hierarchical Time Series : A geometric approach](https://github.com/QuantLet/HTS_visualization) | QuantLet | 14 | Jupyter Notebook | 2025-10-30 | [10.24818/ida-ql/2025.322](https://doi.org/10.24818/ida-ql/2025.322) |
+| [Whitepaper_CC_Indices](https://github.com/QuantLet/Whitepaper_CC_Indices) | QuantLet | 7 | Python | 2025-12-16 | [6 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1117833331) |
+| [A_New_EMD_Approach](https://github.com/QuantLet/A_New_EMD_Approach) | QuantLet | 8 | Jupyter Notebook | 2026-01-06 | [10.24818/ida-ql/2026.24](https://doi.org/10.24818/ida-ql/2026.24) |
+| [01 FINDER-LLM](https://github.com/QuantLet/FINDER-LLM) | QuantLet | 7;8;12 | Jupyter Notebook | 2026-01-15 | — |
+| [fulvio-PhD](https://github.com/QuantLet/fulvio-PhD) | QuantLet | 13 |  | 2026-01-16 | — |
+| [Onchain Insights](https://github.com/QuantLet/onchain-insights) | QuantLet | 8;14 | Jupyter Notebook | 2026-01-19 | [7 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1137415271) |
+| [Transparent-Movie](https://github.com/QuantLet/Transparent-Movie-Instruction) | QuantLet | 8 | Jupyter Notebook | 2026-03-16 | — |
+| [AI_Listening2CB](https://github.com/QuantLet/AI_Listening2CB) | QuantLet | 12 | Jupyter Notebook | 2026-04-01 | — |
+| [Network_Centrality](https://github.com/QuantLet/Network_Centrality) | QuantLet | 14 | Jupyter Notebook | 2026-04-13 | — |
+| [TSFM_VaR_CEE](https://github.com/QuantLet/TSFM_VaR_CEE) | QuantLet | 8 | Jupyter Notebook | 2026-04-15 | — |
+| [XAI_beyond_SHAP](https://github.com/QuantLet/XAI_beyond_SHAP) | QuantLet | 14 |  | 2026-05-12 | — |
+| [MSR](https://github.com/QuantLet/MSR) | QuantLet | 7 | Jupyter Notebook | 2026-07-16 | [10.24818/ida-ql/2024.53](https://doi.org/10.24818/ida-ql/2024.53) |
+| [FATED-Polymarket](https://github.com/QuantLet/FATED-Polymarket) | QuantLet | 7;14 | Jupyter Notebook | 2026-09-03 | — |
+| [STMS_Delta](https://github.com/QuantLet/Delta-Method) | QuantLet | 15 | Jupyter Notebook | 2026-09-24 | — |
+| [Electricity-Portfolio-Hedging](https://github.com/QuantLet/Electricity-Portfolio-Hedging) | QuantLet | 8 | Jupyter Notebook | 2026-10-01 | — |
+| [Polymarked](https://github.com/QuantLet/Polymarked) | QuantLet | 14 |  | 2026-11-04 | — |
+| [Code and Data for Reinforcement Learning in Finance: From Current Practice to Standards and Frameworks](https://github.com/MSCA-DN-Digital-Finance/WP3_eXplainable_and_Fair_AI/tree/f84806bad3edebba538633870a57ce81eaf511e5/IRP1/Code/systematic_literature_review) | Other | 1 | Python | — | [10.5281/zenodo.17232554](https://doi.org/10.5281/zenodo.17232554) |
+| [MSCA-DN-Digital-Finance/stablecoin-onchain-data: DeFi hourly datasets data-2026-02-02](https://github.com/MSCA-DN-Digital-Finance/stablecoin-onchain-data) | Other | 14 |  | — | [10.5281/zenodo.18453290](https://doi.org/10.5281/zenodo.18453290) |
 <!-- END SOFTWARE -->

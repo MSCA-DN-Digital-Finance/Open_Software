@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import re
 import shutil
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 from directory import enrich, load as load_directory
 
@@ -18,6 +18,7 @@ CATEGORIES = {'paper-replication': 'Paper replication software', 'data-collectio
 AVAILABILITY = {'public': 'Public data', 'on-request': 'Data on request', 'restricted': 'Restricted data',
                 'not-required': 'No external data required', 'not-documented': 'Data availability not documented'}
 INDICES = {'not-indexed': 'Not indexed', 'zenodo': 'Zenodo', 'quantlet': 'QuantLet', 'other': 'Other index'}
+QUANTLET_DOI_PATTERN = re.compile(r'10\.\d{4,9}/[^\s;]+')
 
 
 def split(value):
@@ -99,6 +100,15 @@ def read_records(root=None, *, quantlet=False, feed=None):
             if not re.fullmatch(r'10\.\d{4,9}/\S+', row['doi']) or row['doi'] in dois:
                 raise ValueError('Invalid or duplicate software DOI')
             dois.add(row['doi'])
+        quantlet_dois = [normalized_doi(doi) for doi in split(row.get('quantlet_dois'))]
+        if any(not QUANTLET_DOI_PATTERN.fullmatch(doi) for doi in quantlet_dois):
+            raise ValueError('Invalid QuantLet DOI')
+        row['quantlet_dois'] = ';'.join(dict.fromkeys(quantlet_dois))
+        created_at = row.setdefault('repository_created_at', '')
+        if created_at:
+            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', created_at):
+                raise ValueError('Repository creation date must be YYYY-MM-DD')
+            date.fromisoformat(created_at)
         if row.get('key_image_url') and not row.get('key_image_alt'):
             raise ValueError('An image needs descriptive alt text')
         if not row.get('key_image_url') and (row.get('key_image_alt') or row.get('key_image_caption')):
@@ -161,6 +171,11 @@ def inventory(root=None):
                 combined.append(row)
             elif matches[0] >= len(curated):
                 combined[matches[0]] = merge_imports(combined[matches[0]], row)
+            elif feed == 'quantlet-software.csv':
+                existing = combined[matches[0]]
+                if repository_key(existing['repository_url']) == repository_key(row['repository_url']):
+                    existing['quantlet_dois'] = row['quantlet_dois']
+                    existing['repository_created_at'] = row['repository_created_at'] or existing['repository_created_at']
     return {'software': combined}
 
 
@@ -193,8 +208,21 @@ def render_record(row, papers):
     links = link(row['repository_url'], source_label, 'button small') + link(row.get('documentation_url'), 'Documentation') + link(row.get('index_url'), INDICES[row['index']])
     if row.get('doi'):
         links += link('https://doi.org/' + row['doi'], 'DOI: ' + row['doi'])
+    date_html = ''
+    if row.get('repository_created_at'):
+        created = e(row['repository_created_at'])
+        date_html = f'<span class="software-created">Repository created <time datetime="{created}">{created}</time></span>'
+    quantlet_dois = split(row.get('quantlet_dois'))
+    quantlet_html = ''
+    if quantlet_dois:
+        doi_links = [link('https://doi.org/' + quote(doi, safe='/'), doi) for doi in quantlet_dois]
+        if len(doi_links) == 1:
+            quantlet_html = f'<p class="quantlet-citations">QuantLet DOI {doi_links[0]}</p>'
+        else:
+            items = ''.join(f'<li>{item}</li>' for item in doi_links)
+            quantlet_html = f'<details class="quantlet-citations"><summary>{len(doi_links)} QuantLet DOIs</summary><ul>{items}</ul></details>'
     data = '<section class="software-data"><h3>Data availability</h3><strong>' + e(AVAILABILITY[row['data_availability']]) + '</strong><p>' + e(row['data_notes']) + '</p>' + link(row.get('data_url'), 'Data location / access instructions') + '</section>'
-    return f'''<article class="software-card" data-record-id="{row['id']}" id="software-{row['id']}"><div class="entry-top"><span class="entry-type">{e(CATEGORIES[row['category']])}</span>{irps}</div><h2><a href="{e(row['repository_url'])}" target="_blank" rel="noopener noreferrer">{e(row['name'])} ↗</a></h2><p class="software-authors">{e('; '.join(split(row['authors']))) or 'Authors not documented in source metadata'}</p><p>{e(row['summary'])}</p><div class="tags">{tags}</div>{image}<section class="software-papers"><h3>Linked research</h3>{research}</section><details><summary>Software details & data access</summary><dl class="detail-grid">{facts}{fact('Index', INDICES[row['index']])}{fact('Software DOI', row.get('doi'))}</dl>{data}<div class="software-links">{links}</div><p class="provenance">{e(row.get('provenance'))}</p></details><div class="software-actions"><a href="contribute.html?id={row['id']}">Suggest an update ↗</a><button class="text-button" data-copy="software/{row['id']}">Copy record link</button></div></article>'''
+    return f'''<article class="software-card" data-record-id="{row['id']}" id="software-{row['id']}"><div class="entry-top"><span class="entry-type">{e(CATEGORIES[row['category']])}</span>{irps}{date_html}</div><h2><a href="{e(row['repository_url'])}" target="_blank" rel="noopener noreferrer">{e(row['name'])} ↗</a></h2><p class="software-authors">{e('; '.join(split(row['authors']))) or 'Authors not documented in source metadata'}</p><p>{e(row['summary'])}</p><div class="tags">{tags}</div>{quantlet_html}{image}<section class="software-papers"><h3>Linked research</h3>{research}</section><details class="software-details"><summary>Software details & data access</summary><dl class="detail-grid">{facts}{fact('Index', INDICES[row['index']])}{fact('Software DOI', row.get('doi'))}</dl>{data}<div class="software-links">{links}</div><p class="provenance">{e(row.get('provenance'))}</p></details><div class="software-actions"><a href="contribute.html?id={row['id']}">Suggest an update ↗</a><button class="text-button" data-copy="software/{row['id']}">Copy record link</button></div></article>'''
 
 
 def build():

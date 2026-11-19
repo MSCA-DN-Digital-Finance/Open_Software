@@ -1,6 +1,7 @@
 import copy
 import csv
 from datetime import date
+import io
 import json
 import os
 from pathlib import Path
@@ -69,8 +70,47 @@ class QuantLetTests(unittest.TestCase):
         (self.root / 'data/papers.json').write_text(json.dumps(papers))
         (self.root / 'data/quantlet-identities.json').write_text('{"schema_version":1,"identities":[]}')
 
-    def sync(self, client=None, write=True, limit=100):
-        return quantlet.sync(client or FakeClient(), root=self.root, write=write, max_repositories=limit)
+    def sync(self, client=None, write=True, limit=100, doi_loader=lambda: {}):
+        return quantlet.sync(client or FakeClient(), root=self.root, write=write, max_repositories=limit,
+                             doi_loader=doi_loader)
+
+    def test_cards_api_matches_exact_repository_and_keeps_all_distinct_dois(self):
+        def card(url, doi):
+            return {'parent_folder_url': url, 'doi': doi}
+
+        payload = [card('https://github.com/QuantLet/Example/blob/main/first', 'https://doi.org/10.1234/A'),
+                   card('https://github.com/quantlet/example/tree/main/second', '10.1234/b'),
+                   card('https://github.com/QuantLet/Example', '10.1234/a'),
+                   card('https://github.com/QuantLet/Example', 'Not yet assigned'),
+                   card('https://github.com/QuantLet/Example', None),
+                   card('https://github.com/QuantLet/Example-other', '10.1234/other'),
+                   card('https://github.com/another/Example', '10.1234/unrelated'),
+                   card('https://example.org/QuantLet/Example', '10.1234/other-host')]
+        with patch.object(quantlet, 'urlopen', return_value=io.BytesIO(json.dumps(payload).encode())) as request:
+            self.assertEqual(quantlet.fetch_quantlet_dois(), {'quantlet/example': '10.1234/a;10.1234/b',
+                                                             'quantlet/example-other': '10.1234/other'})
+        self.assertEqual(request.call_args.args[0].full_url, quantlet.QUANTLET_API)
+        self.assertNotIn('Authorization', request.call_args.args[0].headers)
+
+    def test_cached_repository_gets_creation_date_and_retains_dois_during_api_failure(self):
+        def unavailable():
+            raise OSError('API unavailable')
+
+        client = FakeClient()
+        self.sync(client, doi_loader=lambda: {'quantlet/example': '10.1234/a;10.1234/b'})
+        client.repos[0]['created_at'] = '2025-01-15T18:23:00Z'
+        client.calls.clear()
+        self.sync(client, doi_loader=unavailable)
+        row = build_site.inventory(self.root)['software'][0]
+        self.assertEqual(client.calls, [])
+        self.assertEqual(row['repository_created_at'], '2025-01-15')
+        self.assertEqual(row['last_updated'], '2026-11-01')
+        self.assertEqual(row['quantlet_dois'], '10.1234/a;10.1234/b')
+        self.assertEqual(row['doi'], '')
+        rendered = build_site.render_record(row, build_site.paper_inventory(self.root))
+        self.assertIn('<time datetime="2025-01-15">', rendered)
+        self.assertIn('2 QuantLet DOIs', rendered)
+        self.assertIn('https://doi.org/10.1234/b', rendered)
 
     def test_parser_handles_crlf_yaml_lists_blocks_and_never_executes_yaml(self):
         parsed = quantlet.parse_metainfo('Author:\r\n  - "Owen Chaffard"\r\n  - Jens Reil\r\nDescription: >\r\n  A multiline\r\n  description\r\nPublished in: Example Paper\r\nInput: !!python/object/apply:os.system ["never-run"]')
@@ -221,7 +261,6 @@ class QuantLetTests(unittest.TestCase):
         with patch.object(client, 'get', return_value={'public_repos': 2}), patch.object(client, 'pages', return_value=[repo()]), self.assertRaises(ValueError): client.repositories()
 
     def test_raw_metadata_request_never_receives_api_authorization(self):
-        import io
         import threading
         client = quantlet.GitHub.__new__(quantlet.GitHub)
         client.headers = {'Authorization': 'Bearer never-send-to-raw-host'}
@@ -288,9 +327,12 @@ class QuantLetTests(unittest.TestCase):
         proposal.write_text(json.dumps({'kind': 'software', 'action': 'update', 'record': {'id': 'quantlet-101', 'name': 'Curated name'}}))
         with patch.object(import_proposal, 'ROOT', self.root), patch.object(build_site, 'ROOT', self.root): import_proposal.apply_proposal(proposal, True)
         client = FakeClient(metadata={'Metainfo.txt': 'Author: Owen Chaffard\nPublished in: Example Paper\nName of Quantlet: Changed remote name'})
-        client.repos[0]['pushed_at'] = '2026-11-02T10:00:00Z'
-        self.sync(client)
-        self.assertEqual([row['name'] for row in build_site.inventory(self.root)['software']], ['Curated name'])
+        client.repos[0].update(pushed_at='2026-11-02T10:00:00Z', created_at='2025-01-15T18:23:00Z')
+        self.sync(client, doi_loader=lambda: {'quantlet/example': '10.1234/new'})
+        row, = build_site.inventory(self.root)['software']
+        self.assertEqual(row['name'], 'Curated name')
+        self.assertEqual(row['repository_created_at'], '2025-01-15')
+        self.assertEqual(row['quantlet_dois'], '10.1234/new')
 
     def test_title_doi_and_url_linking_never_treats_paper_doi_as_software_doi(self):
         client = FakeClient(metadata={'Metainfo.txt': 'Author: Owen Chaffard\nPublished in: https://doi.org/10.1234/paper and https://example.org/draft'})

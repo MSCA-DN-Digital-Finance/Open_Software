@@ -21,13 +21,14 @@ import tempfile
 import threading
 import time
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 
-from build_site import ROOT, inventory, normalized_doi, paper_inventory, split, validate_url
+from build_site import ROOT, QUANTLET_DOI_PATTERN, inventory, normalized_doi, paper_inventory, split, validate_url
 from directory import load as load_directory, name_key, orcid_id, write_json
 
 OWNER = 'QuantLet'
+QUANTLET_API = 'https://quantlet.com/api/cards/home'
 # IRP 7 maintains QuantLet broadly; only an explicit full-name author credit
 # establishes a research association for this candidate.
 AUTHOR_LIST_ONLY_IRPS = {'7'}
@@ -159,6 +160,46 @@ def parse_metainfo(content):
 
 def fingerprint(repo):
     return {key: repo.get(key) for key in ['id', 'full_name', 'pushed_at', 'default_branch', 'description', 'language', 'license', 'archived']}
+
+
+def quantlet_repository(url):
+    if not isinstance(url, str):
+        return ''
+    try:
+        parsed = urlsplit(url)
+        parts = parsed.path.strip('/').split('/')
+        if (parsed.scheme in {'http', 'https'} and parsed.hostname in {'github.com', 'www.github.com'}
+                and not parsed.username and len(parts) >= 2 and parts[0].casefold() == OWNER.casefold()
+                and re.fullmatch(r'[A-Za-z0-9_.-]+', parts[1])):
+            return '/'.join(parts[:2]).casefold()
+    except ValueError:
+        pass
+    return ''
+
+
+def fetch_quantlet_dois():
+    request = Request(QUANTLET_API, headers={'Accept': 'application/json', 'User-Agent': USER_AGENT})
+    with urlopen(request, timeout=30) as response:
+        cards = json.load(response)
+    if not isinstance(cards, list) or any(not isinstance(card, dict) or not {'parent_folder_url', 'doi'} <= card.keys() for card in cards):
+        raise ValueError('Unexpected QuantLet cards response')
+    by_repo = {}
+    for card in cards:
+        repo = quantlet_repository(card['parent_folder_url'])
+        doi = normalized_doi(card['doi']) if isinstance(card['doi'], str) else ''
+        if repo and QUANTLET_DOI_PATTERN.fullmatch(doi):
+            by_repo.setdefault(repo, set()).add(doi)
+    if not by_repo:
+        raise ValueError('QuantLet returned no repository DOIs')
+    return {repo: ';'.join(sorted(dois)) for repo, dois in by_repo.items()}
+
+
+def cached_quantlet_dois(root):
+    path = root / 'data' / FEED
+    if not path.exists():
+        return {}
+    with path.open(encoding='utf-8-sig', newline='') as source:
+        return {quantlet_repository(row['repository_url']): row.get('quantlet_dois', '') for row in csv.DictReader(source)}
 
 
 def tree_entries(client, full_name, sha):
@@ -367,6 +408,7 @@ def record(repo, snapshot, users, evidence, fields, papers):
                license=(repo.get('license') or {}).get('spdx_id') or '', data_availability='not-documented',
                data_notes='Data availability and access conditions have not been independently verified. Consult the repository and its Metainfo files.',
                documentation_url=source + '/blob/' + snapshot['commit'] + '/' + quote(primary['path'], safe='/') if primary['path'] else source,
+               repository_created_at=(repo.get('created_at') or '')[:10],
                last_updated=(repo.get('pushed_at') or '')[:10],
                provenance=f'Imported from {source} at commit {snapshot["commit"]}. Matched by {details}. ' +
                           (f'Source Published in: {reference}. ' if reference else '') +
@@ -384,7 +426,7 @@ def record(repo, snapshot, users, evidence, fields, papers):
     return row
 
 
-def sync(client, *, root=None, write=False, max_repositories=100):
+def sync(client, *, root=None, write=False, max_repositories=100, doi_loader=fetch_quantlet_dois):
     root = root or ROOT
     state_path = root / STATE
     state = json.loads(state_path.read_text(encoding='utf-8')) if state_path.exists() else {'schema_version': 1, 'repositories': {}, 'users': {}}
@@ -426,13 +468,21 @@ def sync(client, *, root=None, write=False, max_repositories=100):
         print(str(exc), flush=True)
     with (root / 'data/software.csv').open(encoding='utf-8', newline='') as source:
         fields = csv.DictReader(source).fieldnames
+    try:
+        dois = doi_loader()
+    except (OSError, ValueError) as exc:
+        print(f'QuantLet DOI API unavailable; retaining previously imported DOIs: {exc}', flush=True)
+        dois = cached_quantlet_dois(root)
+    papers = paper_inventory(root)
     rows, reports = [], []
     for rid, snapshot in sorted(state['repositories'].items(), key=lambda item: int(item[0])):
         evidence = matches(snapshot, state['users'], known)
         if evidence:
             verified_repo = {**current[rid], **snapshot['fingerprint']}
             verified_repo['name'] = verified_repo['full_name'].rsplit('/', 1)[-1]
-            rows.append(record(verified_repo, snapshot, state['users'], evidence, fields, paper_inventory(root)))
+            row = record(verified_repo, snapshot, state['users'], evidence, fields, papers)
+            row['quantlet_dois'] = dois.get(verified_repo['full_name'].casefold(), '')
+            rows.append(row)
             reports.append({'repository': current[rid]['full_name'], 'irps': sorted(evidence, key=int), 'evidence': evidence})
     remaining = len(pending) - completed
     stale_profiles = sum((date.today() - date.fromisoformat(profile['checked_on'])).days >= 30 for profile in state['users'].values())

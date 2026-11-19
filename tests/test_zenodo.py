@@ -178,7 +178,8 @@ class SyncTests(unittest.TestCase):
         item = record(); item['metadata']['custom']['code:codeRepository'] = 'https://github.com/QuantLet/Example'
         quantlet = zenodo.software(item, self.fields, zenodo.load_directory(self.root), self.papers)
         quantlet.update(id='quantlet-123', category='quantlet', irp_numbers='14;16', index='quantlet',
-                        index_url='https://github.com/QuantLet/Example', doi='', contributors='@jpcreil')
+                        index_url='https://github.com/QuantLet/Example', doi='', contributors='@jpcreil',
+                        repository_created_at='2025-01-15', quantlet_dois='10.1234/quantlet')
         with (self.root / 'data/quantlet-software.csv').open('w') as stream:
             writer = csv.DictWriter(stream, fieldnames=self.fields); writer.writeheader(); writer.writerow(quantlet)
         self.sync([item])
@@ -188,6 +189,8 @@ class SyncTests(unittest.TestCase):
         self.assertEqual(merged['category'], 'quantlet')
         self.assertEqual(merged['irp_numbers'], '14;16')
         self.assertEqual(merged['doi'], '10.5281/zenodo.101')
+        self.assertEqual(merged['quantlet_dois'], '10.1234/quantlet')
+        self.assertEqual(merged['repository_created_at'], '2025-01-15')
         self.assertEqual(merged['index_url'], 'https://zenodo.org/records/101')
         self.assertEqual(merged['contributors'], '@jpcreil')
 

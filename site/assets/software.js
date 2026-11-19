@@ -14,7 +14,8 @@
     const labels={category:data.categories,data:data.availability,index:data.indices};
     const controls=Object.keys(mapping),params=new URLSearchParams(location.search);
     const search=document.getElementById('search'),sort=document.getElementById('sort');
-    search.value=params.get('q')||'';if(['name','updated'].includes(params.get('sort')))sort.value=params.get('sort');
+    const dateSortFields={updated:'last_updated',created:'repository_created_at'};
+    search.value=params.get('q')||'';if(Object.hasOwn(dateSortFields,params.get('sort')))sort.value=params.get('sort');
     for(const name of controls){
       const select=document.getElementById(name+'-filter');
       const values=labels[name]?Object.keys(labels[name]):[...new Set(data.software.flatMap(row=>split(row[mapping[name]])))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
@@ -34,7 +35,10 @@
         const papers=[...split(row.publication_ids),...split(row.working_paper_ids)].map(id=>paperNames.get(id)||'');
         const text=[...Object.values(row),...papers].join(' ').toLowerCase();
         return words.every(word=>text.includes(word))&&controls.every(name=>!filter[name]||split(row[mapping[name]]).includes(filter[name]));
-      }).sort((a,b)=>sort.value==='updated'?(b.last_updated||'').localeCompare(a.last_updated||'')||a.name.localeCompare(b.name):a.name.localeCompare(b.name));
+      }).sort((a,b)=>{
+        const field=dateSortFields[sort.value];
+        return (field?(b[field]||'').localeCompare(a[field]||''):0)||a.name.localeCompare(b.name);
+      });
       cards.forEach(card=>card.hidden=true);found.forEach(row=>{const card=cards.get(row.id);card.hidden=false;records.append(card);});
       document.getElementById('result-count').textContent=`${found.length} software ${found.length===1?'record':'records'}`;
       document.getElementById('empty').hidden=found.length>0;
@@ -45,7 +49,7 @@
     function reset(){search.value='';sort.value='name';controls.forEach(name=>document.getElementById(name+'-filter').value='');render();}
     search.addEventListener('input',render);sort.addEventListener('change',render);document.getElementById('reset').addEventListener('click',reset);
     document.addEventListener('click',async event=>{const button=event.target.closest('[data-copy]');if(!button)return;const url=new URL(location.href);url.hash=button.dataset.copy;try{await navigator.clipboard.writeText(url.href);button.textContent='Link copied';}catch{location.hash=button.dataset.copy;button.textContent='Copy the URL from your address bar';}});
-    function route(){const match=location.hash.match(/^#software\/([a-z0-9-]+)$/);const card=match&&cards.get(match[1]);if(card){reset();card.querySelector('details').open=true;card.scrollIntoView({block:'start'});}}
+    function route(){const match=location.hash.match(/^#software\/([a-z0-9-]+)$/);const card=match&&cards.get(match[1]);if(card){reset();card.querySelector('.software-details').open=true;card.scrollIntoView({block:'start'});}}
     addEventListener('hashchange',route);render();route();
   }
   document.querySelectorAll('.software-figure img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;}));
