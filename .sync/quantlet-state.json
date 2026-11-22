@@ -47238,14 +47238,14 @@
       "fingerprint": {
         "id": 1134924329,
         "full_name": "QuantLet/FINDER-LLM",
-        "pushed_at": "2026-11-03T19:22:52Z",
+        "pushed_at": "2026-11-21T19:15:39Z",
         "default_branch": "main",
         "description": null,
         "language": "Jupyter Notebook",
         "license": null,
         "archived": false
       },
-      "commit": "8b335e9846234db535cc9a71b08d722855cd8e1b",
+      "commit": "64f495b8494d8e30a6585c6a345323f4989414f6",
       "metainfo": [
         {
           "path": "Metainfo.txt",
@@ -47262,7 +47262,7 @@
         "david86888",
         "rahu12t111"
       ],
-      "scanned_on": "2026-11-13"
+      "scanned_on": "2026-11-22"
     },
     "1135788612": {
       "fingerprint": {
