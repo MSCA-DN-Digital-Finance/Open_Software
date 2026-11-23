@@ -809,6 +809,33 @@
       "license": "cc-by-4.0",
       "researcher_url": "https://orcid.org/0009-0003-3118-5319",
       "irp_titles": "Risk index for cryptos"
+    },
+    {
+      "id": "zenodo-24469998",
+      "irp_numbers": "4",
+      "researcher_names": "Mohamed Faid",
+      "title": "AI-Based Financial Recommender Systems: A Systematic Review of Methods, Evaluation Practices, and Open Challenges",
+      "authors": "FAID, Mohamed;van Heeswijk, Wouter;Spierdijk, Laura",
+      "year": "2026",
+      "subjects": "",
+      "summary": "A systematic review of 86 studies (2018–2025) mapping AI-driven financial recommender systems, highlighting where traditional ranking models fall short of real-world financial needs and outlining six priorities for future research.",
+      "link": "https://zenodo.org/records/24469999",
+      "code_url": "",
+      "data_url": "",
+      "last_updated": "2026-11-23",
+      "provenance": "Zenodo community digitalfinance: https://zenodo.org/records/24469999. Source metadata modified: 2026-11-23T15:22:19.379364+00:00. Candidate/IRP identities matched by ORCID or exact full name against the shared people dictionary.",
+      "type": "preprint",
+      "venue": "",
+      "doi": "10.2139/ssrn.7113178",
+      "preprint_url": "https://zenodo.org/records/24469999",
+      "publication_date": "2026-07-29",
+      "volume": "",
+      "issue": "",
+      "pages": "",
+      "access": "open-access",
+      "license": "cc-by-4.0",
+      "researcher_url": "https://beta.digital-finance-msca.com/people/mohamed-faid/",
+      "irp_titles": "A recommender system to re-orient investments towards more sustainable technologies and businesses"
     }
   ],
   "working_papers": [
