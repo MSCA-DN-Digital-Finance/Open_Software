@@ -44379,14 +44379,14 @@
       "fingerprint": {
         "id": 1001501295,
         "full_name": "QuantLet/QNAR_RS",
-        "pushed_at": "2025-10-21T00:11:22Z",
+        "pushed_at": "2026-11-22T14:57:47Z",
         "default_branch": "main",
         "description": null,
         "language": "Jupyter Notebook",
         "license": null,
         "archived": false
       },
-      "commit": "b578b55f5938759ea81cba8b3e3b8f1c4f5ec34b",
+      "commit": "d7e58c6a30f34cd607235b2fa5ecf7dc5f304e7f",
       "metainfo": [
         {
           "path": "QNAR_RS_Benchmark/Metainfo.txt",
@@ -44417,7 +44417,7 @@
         "StefanGam",
         "bagutzu"
       ],
-      "scanned_on": "2026-11-13"
+      "scanned_on": "2026-11-23"
     },
     "1005501725": {
       "fingerprint": {
@@ -47106,14 +47106,14 @@
       "fingerprint": {
         "id": 1117833331,
         "full_name": "QuantLet/Whitepaper_CC_Indices",
-        "pushed_at": "2025-12-17T00:01:25Z",
+        "pushed_at": "2026-11-22T22:29:55Z",
         "default_branch": "main",
         "description": null,
         "language": "Python",
         "license": null,
         "archived": false
       },
-      "commit": "553f69e8ff9b16d69ad5d5ba26038be34cf52179",
+      "commit": "be8683675fc24465ac0a32c3b3dc245232db5cab",
       "metainfo": [
         {
           "path": "Bitwise10_Crypto_Index_Fund_chart/Metainfo.txt",
@@ -47173,7 +47173,7 @@
       "contributors": [
         "StefanGam"
       ],
-      "scanned_on": "2026-11-13"
+      "scanned_on": "2026-11-23"
     },
     "1128970967": {
       "fingerprint": {
@@ -47238,14 +47238,14 @@
       "fingerprint": {
         "id": 1134924329,
         "full_name": "QuantLet/FINDER-LLM",
-        "pushed_at": "2026-11-21T19:15:39Z",
+        "pushed_at": "2026-11-22T16:08:16Z",
         "default_branch": "main",
         "description": null,
         "language": "Jupyter Notebook",
         "license": null,
         "archived": false
       },
-      "commit": "64f495b8494d8e30a6585c6a345323f4989414f6",
+      "commit": "fc16311314e134ef6de4940505812a6b2f232d2a",
       "metainfo": [
         {
           "path": "Metainfo.txt",
@@ -47262,7 +47262,7 @@
         "david86888",
         "rahu12t111"
       ],
-      "scanned_on": "2026-11-22"
+      "scanned_on": "2026-11-23"
     },
     "1135788612": {
       "fingerprint": {
