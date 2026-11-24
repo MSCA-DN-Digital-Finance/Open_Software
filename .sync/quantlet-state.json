@@ -47286,14 +47286,14 @@
       "fingerprint": {
         "id": 1137415271,
         "full_name": "QuantLet/onchain-insights",
-        "pushed_at": "2026-11-18T11:27:39Z",
+        "pushed_at": "2026-11-24T11:14:22Z",
         "default_branch": "main",
         "description": "Data collection and analysis for onchain liquidity reserves for stablecoin pairs",
         "language": "Jupyter Notebook",
         "license": null,
         "archived": false
       },
-      "commit": "17b94ee48e95dd82d16b1c0a3383e500f98167d4",
+      "commit": "c345738912cffe0b7c4e1a17eb3529f70ef6a786",
       "metainfo": [
         {
           "path": "1. USDE binance depeg/Metainfo.txt",
@@ -47439,7 +47439,7 @@
         "ochaff",
         "ochaffard"
       ],
-      "scanned_on": "2026-11-18"
+      "scanned_on": "2026-11-24"
     },
     "1146941736": {
       "fingerprint": {
@@ -54337,6 +54337,30 @@
         "ochaff"
       ],
       "scanned_on": "2026-11-13"
+    },
+    "1469182898": {
+      "fingerprint": {
+        "id": 1469182898,
+        "full_name": "QuantLet/spatial-arch-firms",
+        "pushed_at": "2026-11-18T15:24:30Z",
+        "default_branch": "main",
+        "description": "Replication code for the spatial ARCH on localities paper",
+        "language": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "archived": false
+      },
+      "commit": "039344447ac4869e3f7105101aff6c5be3604499",
+      "metainfo": [],
+      "contributors": [
+        "joakpoker"
+      ],
+      "scanned_on": "2026-11-24"
     }
   },
   "users": {
@@ -56054,6 +56078,13 @@
       "type": "User",
       "orcid": "",
       "checked_on": "2026-11-13"
+    },
+    "joakpoker": {
+      "login": "joakpoker",
+      "name": "Mihai Achim",
+      "type": "User",
+      "orcid": "",
+      "checked_on": "2026-11-24"
     },
     "josterri": {
       "login": "josterri",
