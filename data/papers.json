@@ -867,7 +867,7 @@
       "title": "Hierarchical Morphology Search",
       "authors": "Owen Chaffard",
       "year": "2026",
-      "subjects": "Hierarchical Time Series;Forecasting;Optimal Experiment Design",
+      "subjects": "Hierarchical Time Series;Forecasting;Optimal Experimental Design",
       "summary": "We seek to extend the current framework for hierarchical/grouped time series forecasting and linear reconciliation. We highlight using the proof of the MinTrace optimal projection that aggregates serve as additional noisy observations of the bottom nodes' errors. Thus aggregate forecasts are only useful if their disagreement with bottom forecasts are informative of bottom errors, more than they cost in estimation (additional bias/variance). Using this theoretical framework we build a hierarchy search algorithm using greedy additions, we detail its benefit in different data regimes, including abstention in common benchmark datasets where no aggregates provides significant performance improvement.",
       "link": "",
       "code_url": "",
