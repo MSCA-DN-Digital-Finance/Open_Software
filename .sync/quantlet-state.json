@@ -54342,9 +54342,107 @@
       "fingerprint": {
         "id": 1469182898,
         "full_name": "QuantLet/spatial-arch-firms",
-        "pushed_at": "2026-11-18T15:24:30Z",
+        "pushed_at": "2026-11-25T10:23:12Z",
         "default_branch": "main",
         "description": "Replication code for the spatial ARCH on localities paper",
+        "language": "R",
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION",
+          "url": null,
+          "node_id": "MDc6TGljZW5zZTA="
+        },
+        "archived": false
+      },
+      "commit": "6a79dc956828e423e5246b872d52eda370534e5d",
+      "metainfo": [
+        {
+          "path": "SARCHfirms_data/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_data",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "datafile": "INS business register files date2008.CSV to date2023.CSV, not redistributable, plus lau2021.gpkg and nuts3.geojson from Eurostat GISCO",
+            "description": "Aggregates about 9 million local unit records of the Romanian business register to locality level for the 16 annual cross"
+          }
+        },
+        {
+          "path": "SARCHfirms_estimation/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_estimation",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Main estimation of the paper. Fits the non-dynamic spatial ARCH and SARspARCH models of Otto, Schmid and Garthoff (2018) to"
+          }
+        },
+        {
+          "path": "SARCHfirms_figure/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_figure",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Draws Figure 1 of the paper, a two panel greyscale map of the spatial lattices. Panel a shows the full"
+          }
+        },
+        {
+          "path": "SARCHfirms_full_lattice/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_full_lattice",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Checks that nothing is lost by restricting the analysis to the 666 localities with at least 50 firms. Moran I"
+          }
+        },
+        {
+          "path": "SARCHfirms_inference/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_inference",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Monte Carlo study of the estimator on exactly the lattice used in the paper, not on a smaller convenient one."
+          }
+        },
+        {
+          "path": "SARCHfirms_moran_screening/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_moran_screening",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Screens the candidate outcome variables with Moran I computed on levels and on squares, which is what decides that the"
+          }
+        },
+        {
+          "path": "SARCHfirms_robustness/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_robustness",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Re estimates the model under five definitions of the neighbourhood, queen contiguity, k nearest with k equal to 4, 5"
+          }
+        },
+        {
+          "path": "SARCHfirms_sectoral/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "SARCHfirms_sectoral",
+            "author": "Codruta Mare, Mihai-Adrian Achim, Gabriela-Mihaela Muresan",
+            "publishedin": "Spatial Effects in Local Productivity Volatility: A Non-Dynamic Spatial ARCH Analysis of Romanian Localities",
+            "description": "Tests whether the spatial effect is in fact a sectoral effect. Neighbouring localities often share the same industrial structure, so"
+          }
+        }
+      ],
+      "contributors": [
+        "joakpoker"
+      ],
+      "scanned_on": "2026-11-25"
+    },
+    "1471643843": {
+      "fingerprint": {
+        "id": 1471643843,
+        "full_name": "QuantLet/spatial_crypto",
+        "pushed_at": "2026-11-16T12:29:53Z",
+        "default_branch": "main",
+        "description": "Project to apply Spatial Econometric Models, namely Spatial ARCH/Spatial GARCH to non-spatial financial data like cryptocurrencies.",
         "language": null,
         "license": {
           "key": "mit",
@@ -54355,12 +54453,65 @@
         },
         "archived": false
       },
-      "commit": "039344447ac4869e3f7105101aff6c5be3604499",
-      "metainfo": [],
-      "contributors": [
-        "joakpoker"
+      "commit": "27278d85d50ac601ec1e10f4ba9743626dfe8300",
+      "metainfo": [
+        {
+          "path": "NARCH_data/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "NARCH_data",
+            "author": "Mihai-Adrian Achim, Stefana Belbe, Codruta Mare, Philipp Otto",
+            "publishedin": "Spatial Effects and Uncertainty in Cryptocurrencies: the case of Network ARCH Models",
+            "datafile": "market_cap_top_100.csv, prices_top_100.csv, volumes_top_100.csv",
+            "description": "Builds the balanced panel of 50 cryptocurrencies over 1517 consecutive trading days, from 6 January 2021 to 2 March 2025,"
+          }
+        },
+        {
+          "path": "NARCH_diagnostics/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "NARCH_diagnostics",
+            "author": "Mihai-Adrian Achim, Stefana Belbe, Codruta Mare, Philipp Otto",
+            "publishedin": "Spatial Effects and Uncertainty in Cryptocurrencies: the case of Network ARCH Models",
+            "datafile": "returns_prices.csv, returns_volumes.csv",
+            "description": "Specification checks and the dynamic stability condition for the two selected network ARCH models. Three questions are asked. Whether any"
+          }
+        },
+        {
+          "path": "NARCH_estimation/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "NARCH_estimation",
+            "author": "Mihai-Adrian Achim, Stefana Belbe, Codruta Mare, Philipp Otto",
+            "publishedin": "Spatial Effects and Uncertainty in Cryptocurrencies: the case of Network ARCH Models",
+            "datafile": "returns_prices.csv, returns_volumes.csv",
+            "description": "Stage 2 of the pipeline: the dynamic network ARCH model estimated by quasi-maximum likelihood under each of the three neighbourhood"
+          }
+        },
+        {
+          "path": "NARCH_meanfilter/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "NARCH_meanfilter",
+            "author": "Mihai-Adrian Achim, Stefana Belbe, Codruta Mare, Philipp Otto",
+            "publishedin": "Spatial Effects and Uncertainty in Cryptocurrencies: the case of Network ARCH Models",
+            "datafile": "returns_prices.csv, returns_volumes.csv",
+            "description": "Stage 1 of the two-stage network ARCH pipeline: a spatiotemporal ARMA mean filter estimated coin by coin by maximum likelihood,"
+          }
+        },
+        {
+          "path": "NARCH_weights/Metainfo.txt",
+          "fields": {
+            "nameofquantlet": "NARCH_weights",
+            "author": "Mihai-Adrian Achim, Stefana Belbe, Codruta Mare, Philipp Otto",
+            "publishedin": "Spatial Effects and Uncertainty in Cryptocurrencies: the case of Network ARCH Models",
+            "datafile": "returns_prices.csv, returns_volumes.csv",
+            "description": "Builds and visualises the two spatial weight matrices used to define cryptocurrency neighbourhoods in the network ARCH model. Neighbours are"
+          }
+        }
       ],
-      "scanned_on": "2026-11-24"
+      "contributors": [
+        "CodrutaMare",
+        "joakpoker",
+        "stefanacioban"
+      ],
+      "scanned_on": "2026-11-25"
     }
   },
   "users": {
@@ -54559,6 +54710,13 @@
       "type": "User",
       "orcid": "",
       "checked_on": "2026-11-13"
+    },
+    "CodrutaMare": {
+      "login": "CodrutaMare",
+      "name": "",
+      "type": "User",
+      "orcid": "",
+      "checked_on": "2026-11-25"
     },
     "Cordelia8": {
       "login": "Cordelia8",
