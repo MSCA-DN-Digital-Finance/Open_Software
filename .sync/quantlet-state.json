@@ -54342,7 +54342,7 @@
       "fingerprint": {
         "id": 1469182898,
         "full_name": "QuantLet/spatial-arch-firms",
-        "pushed_at": "2026-11-25T10:23:12Z",
+        "pushed_at": "2026-11-26T00:04:57Z",
         "default_branch": "main",
         "description": "Replication code for the spatial ARCH on localities paper",
         "language": "R",
@@ -54355,7 +54355,7 @@
         },
         "archived": false
       },
-      "commit": "6a79dc956828e423e5246b872d52eda370534e5d",
+      "commit": "53494270f7adb09a4706d79683ee13df0b63890d",
       "metainfo": [
         {
           "path": "SARCHfirms_data/Metainfo.txt",
@@ -54432,18 +54432,19 @@
         }
       ],
       "contributors": [
+        "StefanGam",
         "joakpoker"
       ],
-      "scanned_on": "2026-11-25"
+      "scanned_on": "2026-11-26"
     },
     "1471643843": {
       "fingerprint": {
         "id": 1471643843,
         "full_name": "QuantLet/spatial_crypto",
-        "pushed_at": "2026-11-16T12:29:53Z",
+        "pushed_at": "2026-11-26T00:05:12Z",
         "default_branch": "main",
         "description": "Project to apply Spatial Econometric Models, namely Spatial ARCH/Spatial GARCH to non-spatial financial data like cryptocurrencies.",
-        "language": null,
+        "language": "R",
         "license": {
           "key": "mit",
           "name": "MIT License",
@@ -54453,7 +54454,7 @@
         },
         "archived": false
       },
-      "commit": "27278d85d50ac601ec1e10f4ba9743626dfe8300",
+      "commit": "f1c31176e8a04ec668d9b460387cb80e7cac4d11",
       "metainfo": [
         {
           "path": "NARCH_data/Metainfo.txt",
@@ -54508,10 +54509,11 @@
       ],
       "contributors": [
         "CodrutaMare",
+        "StefanGam",
         "joakpoker",
         "stefanacioban"
       ],
-      "scanned_on": "2026-11-25"
+      "scanned_on": "2026-11-26"
     }
   },
   "users": {
