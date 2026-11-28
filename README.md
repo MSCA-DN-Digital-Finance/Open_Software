@@ -207,7 +207,7 @@ python3 scripts/sync_zenodo.py --write  # Refresh the generated feed
 | Software | Category | IRP | Language | Repository created | DOI |
 | --- | --- | --- | --- | --- | --- |
 | [TSFM causal analysis](https://github.com/MSCA-DN-Digital-Finance/tsfm_causal_analysis) | Paper replication software | 1 | Python;Jupyter Notebook;PowerShell | — | — |
-| [Hierarchical Loan forecasting : A study of End-to-End coherent models](https://github.com/QuantLet/Hierarchical-Loan-Forecasting) | Paper replication software | 14 | Python | 2025-02-20 | [10.24818/ida-ql/2025.192](https://doi.org/10.24818/ida-ql/2025.192) |
+| [Hierarchical Loan forecasting : A study of End-to-End coherent models](https://github.com/QuantLet/Hierarchical-Loan-Forecasting) | Paper replication software | 14 | Python | 2025-02-20 | [10.24818/ida-ql/2025.187](https://doi.org/10.24818/ida-ql/2025.187) |
 | [MSM](https://github.com/QuantLet/MSM) | QuantLet | 12;13 | Jupyter Notebook | 2015-10-19 | [13 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-44526513) |
 | [SFE_class_2015](https://github.com/QuantLet/SFE_class_2015) | QuantLet | 7;12;15 | Jupyter Notebook | 2015-12-04 | [21 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-47378199) |
 | [SFM2-SS16-ToDo](https://github.com/QuantLet/SFM2-SS16-ToDo) | QuantLet | 11 | Jupyter Notebook | 2016-05-02 | [10 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-57884663) |
@@ -233,7 +233,7 @@ python3 scripts/sync_zenodo.py --write  # Refresh the generated feed
 | [DEDA_2025_CUEB](https://github.com/QuantLet/DEDA_2025_CUEB) | QuantLet | 8 | Jupyter Notebook | 2025-07-09 | [25 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1016737398) |
 | [Stable_Distribution](https://github.com/QuantLet/Stable_Distribution) | QuantLet | 7;12 | Jupyter Notebook | 2025-07-23 | [10.24818/ida-ql/2025.240](https://doi.org/10.24818/ida-ql/2025.240) |
 | [Proper Scoring Rules](https://github.com/QuantLet/Proper-Scoring-Rules) | QuantLet | 14 | Jupyter Notebook | 2025-08-05 | [6 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1032370311) |
-| [LLMs-for-BTC-TS](https://github.com/QuantLet/LLMs-for-BTC-TS) | QuantLet | 14 | Jupyter Notebook | 2025-09-23 | [10.24818/ida-ql/2025.201](https://doi.org/10.24818/ida-ql/2025.201) |
+| [LLMs-for-BTC-TS](https://github.com/QuantLet/LLMs-for-BTC-TS) | QuantLet | 14 | Jupyter Notebook | 2025-09-23 | [10.24818/ida-ql/2025.200](https://doi.org/10.24818/ida-ql/2025.200) |
 | [2025_HTW_ESG_Portfolio_Optimization](https://github.com/QuantLet/ESG-Portfolio-Optimization) | QuantLet | 8;12 | Jupyter Notebook | 2025-10-10 | [10.24818/ida-ql/2025.1](https://doi.org/10.24818/ida-ql/2025.1) |
 | [Hierarchical Time Series : A geometric approach](https://github.com/QuantLet/HTS_visualization) | QuantLet | 14 | Jupyter Notebook | 2025-10-30 | [10.24818/ida-ql/2025.322](https://doi.org/10.24818/ida-ql/2025.322) |
 | [Whitepaper_CC_Indices](https://github.com/QuantLet/Whitepaper_CC_Indices) | QuantLet | 7 | Python | 2025-12-16 | [6 DOIs](https://msca-dn-digital-finance.github.io/Open_Software/#software/quantlet-1117833331) |
